@@ -69,24 +69,4 @@ class Therapy(T)
   def validate!(input : T) : T
     validate(input).value
   end
-
-  def transforming(&block : T -> R) : TransformingTherapy(T, R) forall R
-    TransformingTherapy.new(self, block)
-  end
-
-  class TransformingTherapy(FROM, TO)
-    private getter validator : Therapy(FROM)
-    private getter transformer : Proc(FROM, TO)
-
-    def initialize(@validator : Therapy(FROM), @transformer : Proc(FROM, TO))
-    end
-
-    def validate(input : FROM) : Validation(TO)
-      validator.validate(input).map(&transformer)
-    end
-
-    def validate!(input : FROM) : TO
-      validate(input).value
-    end
-  end
 end
