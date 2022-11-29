@@ -19,23 +19,10 @@ Get it? Therapy... validation... come on!
 ```crystal
 require "therapy"
 
-sign_up_form_validation = Therapy.compose(
-  Therapy.for(String?).presence("Email must be present").lift(URI::Params, &.[]?("email")),
-  Therapy.for(String?).presence("Password must be present").lift(URI::Params, &.[]?("password")),
-  Therapy.for(URI::Params).is_true("Password confirmation must match password") { |form| form["password_confirmation"]? == form["password"]? }
-).transforming { |form| {email: form["email"], password: form["password"]} }
-
-# Use the safe API to check on the results of the validation
-validation = sign_up_form_validation.validate(form)
-if validation.valid?
-  data = validation.data
-  ...
-else
-  puts validation.errors
-end
-
-# Use the unsafe API to get right to the data or raise an error
-data = sign_up_form_validation.validate!(form)
+therapy = Therapy.for(request.form)
+email = therapy.parse_str("email").value
+password = therapy.parse_str("password").value
+therapy.parse_str("password_confirmation").eq(password_validation.value?).valid!
 ```
 
 TODO: Write usage instructions here

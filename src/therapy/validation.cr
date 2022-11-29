@@ -5,13 +5,14 @@ module Therapy
 
   abstract class Validation(T) < BaseValidation
     abstract def value : T
+    abstract def value? : T?
     abstract def valid? : Bool
 
     def valid! : Bool
       valid? || raise "invalid #{errors}"
     end
 
-    def eq(other : T, err_msg = "must equal expected value") : Validation(T)
+    def eq(other : T?, err_msg = "must equal expected value") : Validation(T)
       return self unless valid?
 
       if self.value == other
@@ -30,6 +31,10 @@ module Therapy
       def valid? : Bool
         true
       end
+
+      def value? : T?
+        value
+      end
     end
 
     class Invalid(T) < Validation(T)
@@ -46,6 +51,10 @@ module Therapy
 
       def value : T
         raise "invalid #{errors}"
+      end
+
+      def value? : T?
+        nil
       end
 
       def valid? : Bool
