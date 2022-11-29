@@ -1,26 +1,23 @@
-class Therapy(T)
+module Therapy
   private abstract class BaseValidation
     getter errors : Array(String) { [] of String }
   end
 
   abstract class Validation(T) < BaseValidation
-    def self.compose(*validateds : Validation(T)) : Validation(T) forall T
-      if validateds.all?(&.valid?)
-        Valid(T).new(validateds.first.value)
-      else
-        Invalid(T).of(*validateds)
-      end
-    end
-
     abstract def value : T
     abstract def valid? : Bool
 
-    def map(&block : T -> R) : Validation(R) forall R
-      if valid?
-        result = yield value
-        Valid(R).new(result)
+    def valid! : Bool
+      valid? || raise "invalid #{errors}"
+    end
+
+    def eq(other : T, err_msg = "must equal expected value") : Validation(T)
+      return self unless valid?
+
+      if self.value == other
+        Valid(T).new(value)
       else
-        Invalid(R).new(errors)
+        Invalid(T).new(err_msg)
       end
     end
 
