@@ -1,4 +1,11 @@
 class Therapy::Session
+  CONVERSIONS = {
+    String  => ->(input : String) { input },
+    Int32   => ->(input : String) { input.to_i32 },
+    Int64   => ->(input : String) { input.to_i64 },
+    Float64 => ->(input : String) { input.to_f64 },
+  }
+
   private getter form : URI::Params
 
   def initialize(@form)
@@ -39,19 +46,8 @@ class Therapy::Session
   end
 
   private def convert(value : String, to type : T.class) : Validation(T) forall T
-    result = case type
-             when String
-               value
-             when Int32
-               value.to_i32
-             when Int64
-               value.to_i64
-             when Float64
-               value.to_f64
-             else
-               raise "TODO: handle #{type}"
-             end
-    Validation::Valid(T).new(result.as(T))
+    convertor = CONVERSIONS[type]? || raise "TODO: handle #{type}"
+    Validation::Valid(T).new(convertor.call(value).as(T))
   rescue e
     Validation::Invalid(T).new("unable to convert to expected type (#{e.message || "no error message"})")
   end
