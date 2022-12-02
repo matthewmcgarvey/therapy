@@ -1,9 +1,13 @@
 class Therapy::Session
   CONVERSIONS = {
-    String  => ->(input : String) { input },
-    Int32   => ->(input : String) { input.to_i32 },
-    Int64   => ->(input : String) { input.to_i64 },
-    Float64 => ->(input : String) { input.to_f64 },
+    String   => ->(input : String) { input },
+    String?  => ->(input : String) { input },
+    Int32    => ->(input : String) { input.to_i32 },
+    Int32?   => ->(input : String) { input.to_i32 },
+    Int64    => ->(input : String) { input.to_i64 },
+    Int64?   => ->(input : String) { input.to_i64 },
+    Float64  => ->(input : String) { input.to_f64 },
+    Float64? => ->(input : String) { input.to_f64 },
   }
 
   private getter form : URI::Params
