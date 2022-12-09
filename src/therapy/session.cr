@@ -24,7 +24,8 @@ class Therapy::Session
   end
 
   def parse(name : String, type : T.class) : Validation(T) forall T
-    if !form.has_key?(name)
+    values = form.fetch_all(name).compact_map(&.presence)
+    if values.none?
       {% if T.nilable? %}
         return Validation::Valid(T).new(nil)
       {% else %}
@@ -32,7 +33,6 @@ class Therapy::Session
       {% end %}
     end
 
-    values = form.fetch_all(name)
     convert(values, to: type)
   end
 
