@@ -1,10 +1,11 @@
-require "./therapy/validation"
 require "./therapy/session"
 
 module Therapy
-  VERSION = "0.1.0"
+  def self.from_nilable_string : FreeSession(String?)
+    from(String?)
+  end
 
-  def self.for(form : URI::Params) : Session
-    Session.new(form)
+  def self.from(_klass : T.class) : FreeSession(T) forall T
+    FreeSession(T).new
   end
 end
