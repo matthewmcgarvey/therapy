@@ -1,5 +1,13 @@
 # Notes
 
+## 01-11-2023
+
+Why not rewrite this library... AGAIN?!?!
+
+I have never heard of [zod](https://zod.dev/) but apparently it's a big deal in the JS-world.
+It also happens to be _exactly_ what I am wanting to build, so I'm wondering if it's possible to
+have a similar API.
+
 ## 01-10-2023
 
 I thought it would be a good idea to limit a Parser to have the error type of just a string,
