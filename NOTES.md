@@ -1,5 +1,10 @@
 # Notes
 
+## 01-10-2023
+
+I thought it would be a good idea to limit a Parser to have the error type of just a string,
+but that breaks when I'm trying to zip together parsers. I need the errors to be separated.
+
 ## 01-06-2023
 
 I don't understand how in the kotlin library, you can go from

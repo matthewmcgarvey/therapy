@@ -1,5 +1,5 @@
-abstract class Therapy::Validated(VAL)
-  def fold(ferr : String -> T, fval : VAL -> T) : T forall T
+abstract class Therapy::Validated(ERR, VAL)
+  def fold(ferr : ERR -> T, fval : VAL -> T) : T forall T
     case self
     when Valid
       fval.call(self.value)
@@ -11,31 +11,31 @@ abstract class Therapy::Validated(VAL)
   end
 
   def valid? : Bool
-    fold(->(_val : String) { false }, ->(_val : VAL) { true })
+    fold(->(_val : ERR) { false }, ->(_val : VAL) { true })
   end
 
   def invalid? : Bool
-    fold(->(_val : String) { true }, ->(_val : VAL) { false })
+    fold(->(_val : ERR) { true }, ->(_val : VAL) { false })
   end
 
-  def map(&block : VAL -> NEWVAL) : Validated(NEWVAL) forall NEWVAL
+  def map(&block : VAL -> NEWVAL) : Validated(ERR, NEWVAL) forall NEWVAL
     flat_map do |input|
-      Valid.new(block.call(input))
+      Valid(ERR, NEWVAL).new(block.call(input))
     end
   end
 
-  def flat_map(&block : VAL -> Validated(NEWVAL)) : Validated(NEWVAL) forall NEWVAL
+  def flat_map(&block : VAL -> Validated(ERR, NEWVAL)) : Validated(ERR, NEWVAL) forall NEWVAL
     case self
     when Valid
       block.call(self.value)
     when Invalid
-      Invalid(NEWVAL).new(self.value)
+      Invalid(ERR, NEWVAL).new(self.value)
     else
       raise "crystal... why?"
     end
   end
 
-  def handle_err_with(&block : String -> Validated(VAL)) : Validated(VAL)
+  def handle_err_with(&block : ERR -> Validated(ERR, VAL)) : Validated(ERR, VAL)
     case self
     when Valid
       self
@@ -46,29 +46,29 @@ abstract class Therapy::Validated(VAL)
     end
   end
 
-  def or_else(&block : -> Validated(VAL)) : Validated(VAL)
+  def or_else(&block : -> Validated(ERR, VAL)) : Validated(ERR, VAL)
     handle_err_with { |_input| block.call }
   end
 
-  def redeem(ferr : String -> NEWVAL, fval : VAL -> NEWVAL) : Validated(NEWVAL) forall NEWVAL
+  def redeem(ferr : ERR -> NEWVAL, fval : VAL -> NEWVAL) : Validated(ERR, NEWVAL) forall NEWVAL
     case self
     when Valid
       map(&fval)
     when Invalid
-      Valid.new(ferr.call(self.value))
+      Valid(ERR, NEWVAL).new(ferr.call(self.value))
     else
       raise "crystal... why?"
     end
   end
 
-  class Invalid(VAL) < Validated(VAL)
-    getter value : String
+  class Invalid(ERR, VAL) < Validated(ERR, VAL)
+    getter value : ERR
 
-    def initialize(@value : String)
+    def initialize(@value : ERR)
     end
   end
 
-  class Valid(VAL) < Validated(VAL)
+  class Valid(ERR, VAL) < Validated(ERR, VAL)
     getter value : VAL
 
     def initialize(@value : VAL)

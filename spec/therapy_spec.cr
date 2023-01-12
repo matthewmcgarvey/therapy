@@ -66,5 +66,11 @@ describe Therapy do
     l = Therapy.from_nilable_string.with_default { "hello" }
     l.parse("goodbye").value.should eq("goodbye")
     l.parse(nil).value.should eq("hello")
+
+    m = Therapy.from_nilable_string.map_input(->(input : NamedTuple(key: String)) { input[:key] })
+    m.parse({key: "value"}).value.should eq("value")
+
+    m1 = Therapy.from_nilable_string.map_input(Hash(String, String)) {|input| input["key"]}
+    m1.parse({"key" => "value"}).value.should eq("value")
   end
 end
