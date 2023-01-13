@@ -4,12 +4,12 @@ class Therapy::CoercingType(T) < Therapy::BaseType(T)
   def initialize(@inner : BaseType(T))
   end
 
-  def parse(input) : T
+  def parse(input) : Result(T)
     if input.nil?
       {% if T.nilable? %}
-        return nil
+        return Result::Success(T).new(nil)
       {% else %}
-        raise "input was nil and it shouldn't be"  
+        return Result::Failure(T).new(["input was nil and it shouldn't be"])
       {% end %}
     end
 

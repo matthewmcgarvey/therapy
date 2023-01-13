@@ -1,14 +1,15 @@
 class Therapy::StringType < Therapy::BaseType(String)
   private getter checks = [] of {check: String -> Bool, msg: String}
 
-  def parse(input : String) : String
-    checks.each do |check|
-      if !check[:check].call(input)
-        raise check[:msg]
-      end
-    end
+  def parse(input : String) : Result(String)
+    results = checks.reject { |check| check[:check].call(input) }
+      .map { |check| check[:msg] }
 
-    input
+    if results.any?
+      Result::Failure(String).new(results)
+    else
+      Result::Success.new(input)
+    end
   end
 
   def min(size : Int32) : self

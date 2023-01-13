@@ -8,11 +8,11 @@ class Therapy::OptionalType(T) < Therapy::BaseType(T?)
     self
   end
 
-  def parse(input : T?) : T?
+  def parse(input : T?) : Result(T?)
     if input.nil?
-      nil
+      Result::Success(T?).new(nil)
     else
-      inner.parse(input)
+      inner.parse(input).map(&.as(T?))
     end
   end
 

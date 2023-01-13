@@ -7,12 +7,16 @@ abstract class Therapy::BaseType(T)
     CoercingType.new(self)
   end
 
-  def parse(input : T) : T
-    input
+  def parse!(input) : T
+    parse(input).value
   end
 
-  def parse(input) : T
-    raise "can' parse this type"
+  def parse(input : T) : Result(T)
+    Result::Success.new(input)
+  end
+
+  def parse(input) : Result(T)
+    Result::Failure(T).new(["can't parse this type"])
   end
 
   protected def coerce(input : T) : T

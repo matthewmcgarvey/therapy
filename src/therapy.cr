@@ -1,3 +1,4 @@
+require "./therapy/result"
 require "./therapy/base_type"
 require "./therapy/*"
 
