@@ -20,5 +20,12 @@ describe Therapy do
     c = Therapy.string.min(2)
     c.parse!("abc").should eq("abc")
     expect_raises(Exception) { c.parse!("a") }
+
+    d = Therapy.string.one_of("red", "yellow", "green")
+    d.parse!("red").should eq("red")
+    expect_raises(Exception) { d.parse!("blue") }
+
+    e = Therapy.string.strip
+    e.parse!("  input  ").should eq("input")
   end
 end

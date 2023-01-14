@@ -1,4 +1,6 @@
 require "./therapy/result"
+require "./therapy/parse_context"
+require "./therapy/check"
 require "./therapy/base_type"
 require "./therapy/*"
 
