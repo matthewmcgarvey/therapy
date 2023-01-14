@@ -17,6 +17,12 @@ describe Therapy do
     expect_raises(Exception) { b1.parse!("5") }
     expect_raises(Exception) { b1.parse!(nil) }
 
+    b2 = Therapy.int32.min(2).max(9)
+    b2.parse!(2).should eq(2)
+    b2.parse!(9).should eq(9)
+    expect_raises(Exception) { b2.parse!(1) }
+    expect_raises(Exception) { b2.parse!(10) }
+
     c = Therapy.string.min(2)
     c.parse!("abc").should eq("abc")
     expect_raises(Exception) { c.parse!("a") }
