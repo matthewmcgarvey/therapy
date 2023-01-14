@@ -27,5 +27,13 @@ describe Therapy do
 
     e = Therapy.string.strip
     e.parse!("  input  ").should eq("input")
+
+    f = Therapy.bool
+    f.parse!(true).should eq(true)
+
+    f1 = Therapy.bool.coercing
+    f1.parse!(true).should eq(true)
+    f1.parse!("true").should eq(true)
+    f1.parse!("false").should eq(false)
   end
 end

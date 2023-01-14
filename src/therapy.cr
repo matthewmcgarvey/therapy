@@ -12,4 +12,8 @@ module Therapy
   def self.int32 : Int32Type
     Int32Type.new
   end
+
+  def self.bool : BoolType
+    BoolType.new
+  end
 end
