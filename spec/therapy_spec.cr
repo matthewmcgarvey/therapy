@@ -2,7 +2,7 @@ require "./spec_helper"
 
 describe Therapy do
   it "works" do
-    a = Therapy.string.optional.coercing
+    a = Therapy.string.coercing.optional
     a.parse!("abc").should eq("abc")
     a.parse!(nil).should eq(nil)
     a.parse!(5).should eq("5")
@@ -11,6 +11,7 @@ describe Therapy do
     b.parse!(5).should eq(5)
     b.parse!("5").should eq(5)
     b.parse!(true).should eq(1)
+    expect_raises(Exception) { b.parse!(nil) }
 
     b1 = Therapy.int32
     b1.parse!(5).should eq(5)

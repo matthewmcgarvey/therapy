@@ -1,13 +1,4 @@
 class Therapy::StringType < Therapy::BaseType(String)
-  private getter checks = [] of Check(String)
-
-  def parse(input : String) : Result(String)
-    context = ParseContext(String).new(input)
-    checks.each(&.check(context))
-
-    context.to_result
-  end
-
   def min(size : Int32) : self
     checks << Check(String).valid("Must be at least #{size}") { |str| str.size >= size }
 
@@ -63,6 +54,11 @@ class Therapy::StringType < Therapy::BaseType(String)
       ->(ctx : ParseContext(String)) {  ctx.value = ctx.value.strip }
     )
 
+    self
+  end
+
+  def coercing : self
+    @coercing = true
     self
   end
 

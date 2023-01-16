@@ -1,10 +1,9 @@
 abstract class Therapy::BaseType(T)
+  @coercing : Bool = false
+  private getter checks = [] of Check(T)
+
   def optional : OptionalType(T)
     OptionalType.new(self)
-  end
-
-  def coercing : CoercingType(T)
-    CoercingType.new(self)
   end
 
   def parse!(input) : T
@@ -12,11 +11,22 @@ abstract class Therapy::BaseType(T)
   end
 
   def parse(input : T) : Result(T)
-    Result::Success.new(input)
+    context = ParseContext(T).new(input)
+    checks.each(&.check(context))
+
+    context.to_result
   end
 
   def parse(input) : Result(T)
-    Result::Failure(T).new(["can't parse this type"])
+    if input.nil?
+      return Result::Failure(T).new(["input was nil and it shouldn't be"])
+    end
+
+    if @coercing
+      parse(coerce(input))
+    else
+      Result::Failure(T).new(["can't parse this type"])
+    end
   end
 
   protected def coerce(input : T) : T
