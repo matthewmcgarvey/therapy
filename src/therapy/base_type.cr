@@ -29,6 +29,18 @@ abstract class Therapy::BaseType(T)
     end
   end
 
+  def from_json(&block : JSON::Any -> OUT) : LiftedType(JSON::Any, OUT, T) forall OUT
+    lift(block)
+  end
+
+  def from_params(&block : URI::Params -> OUT) : LiftedType(URI::Params, OUT, T) forall OUT
+    lift(block)
+  end
+
+  def lift(fn : Proc(IN, OUT)) : LiftedType(IN, OUT, T) forall IN, OUT
+    Therapy::LiftedType(IN, OUT, T).new(self, fn)
+  end
+
   protected def coerce(input : T) : T
     input
   end
