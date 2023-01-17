@@ -17,7 +17,7 @@ module Therapy
     BoolType.new
   end
 
-  def self.object(**options : **T) forall IN, T
+  def self.object(**options : **T) forall T
     {% begin %}
     {% for key in T.keys %}
       {% val_type = T[key] %}
