@@ -51,7 +51,7 @@ class Therapy::StringType < Therapy::BaseType(String)
 
   def strip : self
     checks << Check(String).new(
-      ->(ctx : ParseContext(String)) {  ctx.value = ctx.value.strip }
+      ->(ctx : ParseContext(String)) { ctx.value = ctx.value.strip }
     )
 
     self

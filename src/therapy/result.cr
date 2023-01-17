@@ -15,6 +15,7 @@ abstract struct Therapy::Result(T)
 
   struct Success(T) < Result(T)
     getter value : T
+
     def initialize(@value)
     end
 
@@ -30,8 +31,10 @@ abstract struct Therapy::Result(T)
       [] of String
     end
   end
+
   struct Failure(T) < Result(T)
     getter errors : Array(String)
+
     def initialize(@errors)
     end
 
