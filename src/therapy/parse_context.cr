@@ -17,14 +17,21 @@ class Therapy::BaseParseContext(T, V)
     end
   end
 
+  def map(fn : V -> T) : ParseContext(T)
+    ParseContext(T).new(fn.call(value), errors)
+  end
+
+  def map(fn : V -> X) : BaseParseContext(T, X) forall X
+    ParseContext(T).create(fn.call(value), errors)
+  end
 end
 
 class Therapy::ParseContext(T) < Therapy::BaseParseContext(T, T)
-  def self.create(value : T) : ParseContext(T)
-    new(value)
-  end
-
-  def self.create(value : V) : BaseParseContext(T, V) forall V
-    BaseParseContext(T, V).new(value)
+  def self.create(value : V, errors = [] of Therapy::Error) : BaseParseContext(T, V) forall V
+    if value.is_a?(T)
+      ParseContext(T).new(value, errors)
+    else
+      BaseParseContext(T, V).new(value, errors)
+    end
   end
 end

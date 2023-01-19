@@ -62,7 +62,7 @@ class Therapy::StringType < Therapy::BaseType(String)
     self
   end
 
-  protected def coerce(input) : String
-    input.to_s
+  protected def _coerce(value) : String
+    value.to_s
   end
 end

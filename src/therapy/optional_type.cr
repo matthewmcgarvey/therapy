@@ -24,9 +24,9 @@ class Therapy::OptionalType(T) < Therapy::BaseType(T?)
     end
   end
 
-  def coerce(input) : T?
-    return nil if input.nil?
+  def _coerce(value) : T?
+    return nil if value.nil?
 
-    inner.coerce(input)
+    inner._coerce(value)
   end
 end

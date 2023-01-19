@@ -4,14 +4,14 @@ class Therapy::BoolType < Therapy::BaseType(Bool)
     self
   end
 
-  protected def coerce(input : String) : Bool
-    case input.downcase
+  protected def _coerce(value : String) : Bool
+    case value.downcase
     when "true"
       true
     when "false"
       false
     else
-      raise "can't handle this anymore #{input}"
+      raise "can't handle this anymore #{value}"
     end
   end
 end

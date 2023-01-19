@@ -14,11 +14,11 @@ class Therapy::Int32Type < Therapy::BaseType(Int32)
     self
   end
 
-  protected def coerce(input : String) : Int32
-    input.to_i32
+  protected def _coerce(value : String) : Int32
+    value.to_i32
   end
 
-  protected def coerce(input : Bool) : Int32
-    input ? 1 : 0
+  protected def _coerce(value : Bool) : Int32
+    value ? 1 : 0
   end
 end
