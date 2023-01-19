@@ -31,6 +31,16 @@ TODO: Write usage instructions here
 
 TODO: Write development instructions here
 
+## TODO
+
+- Get ObjectType to extend BaseType
+- Remove lift from BaseType
+- Make ObjectType coercing work with JSON::Any and URI::Params and other stuff
+- Get path working on the context
+- Errors need to have the path
+- Add array support
+- Add validations to objects (confirmation == password)
+
 ## Contributing
 
 1. Fork it (<https://github.com/matthewmcgarvey/therapy/fork>)
