@@ -8,14 +8,6 @@ class Therapy::OptionalType(T) < Therapy::BaseType(T?)
     self
   end
 
-  def parse(input : T?) : Result(T?)
-    if input.nil?
-      Result::Success(T?).new(nil)
-    else
-      inner.parse(input).map(&.as(T?))
-    end
-  end
-
   def parse(input) : Result(T?)
     if input.nil?
       Result::Success(T?).new(nil)
@@ -24,9 +16,9 @@ class Therapy::OptionalType(T) < Therapy::BaseType(T?)
     end
   end
 
-  def _coerce(value) : T?
-    return nil if value.nil?
+  def coerce(value) : Result(T?)
+    return Result::Success(T?).new(nil) if value.nil?
 
-    inner._coerce(value)
+    inner.coerce(value)
   end
 end

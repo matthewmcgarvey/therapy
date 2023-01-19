@@ -16,7 +16,16 @@ abstract class Therapy::BaseType(T)
     end
 
     context = ParseContext(T).create(input)
-    context = coerce(context) if @coercing
+    parse_context(context)
+  end
+
+  protected def parse_context(context : BaseParseContext(T, V)) : Result(T) forall V
+    if @coercing
+      coerced = coerce(context.value)
+      return coerced if coerced.failure?
+
+      context = ParseContext(T).create(coerced.value)
+    end
     _parse(context)
     context.to_result
   end
@@ -41,15 +50,11 @@ abstract class Therapy::BaseType(T)
     Therapy::LiftedType(IN, OUT, T).new(self, fn)
   end
 
-  protected def coerce(context : BaseParseContext(T, V)) : ParseContext(T) forall V
-    context.map ->(input : V) { _coerce(input) }
+  protected def coerce(value : T) : Result(T)
+    Result::Success(T).new(value)
   end
 
-  protected def _coerce(value : T) : T
-    value
-  end
-
-  protected abstract def _coerce(value : _) : T
+  protected abstract def coerce(value : _) : Result(T)
 
   private def add_check(check : ParseContext(T) ->)
     checks << Check(T).new(check)

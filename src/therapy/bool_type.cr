@@ -4,14 +4,14 @@ class Therapy::BoolType < Therapy::BaseType(Bool)
     self
   end
 
-  protected def _coerce(value : String) : Bool
+  protected def coerce(value : String) : Result(Bool)
     case value.downcase
     when "true"
-      true
+      Result::Success.new(true)
     when "false"
-      false
+      Result::Success.new(false)
     else
-      raise "can't handle this anymore #{value}"
+      Result::Failure(Bool).with_msg("Not coercable to bool")
     end
   end
 end
