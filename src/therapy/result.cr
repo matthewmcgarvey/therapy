@@ -2,7 +2,7 @@ abstract struct Therapy::Result(T)
   abstract def success? : Bool
   abstract def failure? : Bool
   abstract def value : T
-  abstract def errors : Array(String)
+  abstract def errors : Array(Therapy::Error)
 
   def map(&block : T -> Y) : Result(Y) forall Y
     if success?
@@ -27,13 +27,13 @@ abstract struct Therapy::Result(T)
       true
     end
 
-    def errors : Array(String)
-      [] of String
+    def errors : Array(Therapy::Error)
+      [] of Therapy::Error
     end
   end
 
   struct Failure(T) < Result(T)
-    getter errors : Array(String)
+    getter errors : Array(Therapy::Error)
 
     def initialize(@errors)
     end
@@ -47,7 +47,7 @@ abstract struct Therapy::Result(T)
     end
 
     def value : T
-      raise errors.join(", ")
+      raise errors.map(&.message).join(", ")
     end
   end
 end

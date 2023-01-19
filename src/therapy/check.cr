@@ -1,19 +1,20 @@
 class Therapy::Check(T)
   def self.valid(error_msg : String, &block : T -> Bool) : Check(T) forall T
-    check = ->(input : ParseContext(T)) do
+    check = ->(input : Therapy::ParseContext(T)) do
       if !block.call(input.value)
-        input.errors << error_msg
+        err = Therapy::Error.new(error_msg)
+        input.errors << err
       end
     end
     Check(T).new(check)
   end
 
-  @check : ParseContext(T) -> Nil
+  @check : Therapy::ParseContext(T) -> Nil
 
   def initialize(@check)
   end
 
-  def check(context : ParseContext(T))
+  def check(context : Therapy::ParseContext(T))
     @check.call(context)
   end
 end

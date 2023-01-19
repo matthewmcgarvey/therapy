@@ -10,23 +10,23 @@ abstract class Therapy::BaseType(T)
     parse(input).value
   end
 
-  def parse(input : T) : Result(T)
-    context = ParseContext(T).new(input)
+  def parse(input) : Result(T)
+    if @coercing && input
+      input = coerce(input)
+    end
+    context = ParseContext(T).create(input)
+    _parse(context)
+  end
+
+  protected def _parse(context : ParseContext(T)) : Result(T)
     checks.each(&.check(context))
 
     context.to_result
   end
 
-  def parse(input) : Result(T)
-    if input.nil?
-      return Result::Failure(T).new(["input was nil and it shouldn't be"])
-    end
-
-    if @coercing
-      parse(coerce(input))
-    else
-      Result::Failure(T).new(["can't parse this type"])
-    end
+  protected def _parse(context : BaseParseContext(T, V)) : Result(T) forall V
+    context.add_error("Input was #{V} and expected it to be #{T}")
+    context.to_result
   end
 
   def from_json(&block : JSON::Any -> OUT) : LiftedType(JSON::Any, OUT, T) forall OUT

@@ -13,7 +13,7 @@ class Therapy::ObjectType(IN, VALIDATORS, OUT)
       hash = results.map { |res| {res[0], res[1].value} }.to_h
       Result::Success.new(OUT.from(hash))
     else
-      errors = results.flat_map { |res| res[1].errors.map { |err| "#{res[0]}: #{err}" } }
+      errors = results.flat_map { |res| res[1].errors.map { |err| Therapy::Error.new("#{res[0]}: #{err}") } }
       Result::Failure(OUT).new(errors)
     end
   end
