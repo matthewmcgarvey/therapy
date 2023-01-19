@@ -18,17 +18,15 @@ abstract class Therapy::BaseType(T)
     context = ParseContext(T).create(input)
     context = coerce(context) if @coercing
     _parse(context)
+    context.to_result
   end
 
-  protected def _parse(context : ParseContext(T)) : Result(T)
+  protected def _parse(context : ParseContext(T)) : Nil
     checks.each(&.check(context))
-
-    context.to_result
   end
 
-  protected def _parse(context : BaseParseContext(T, V)) : Result(T) forall V
+  protected def _parse(context : BaseParseContext(T, V)) : Nil forall V
     context.add_error("Input was #{V} and expected it to be #{T}")
-    context.to_result
   end
 
   def from_json(&block : JSON::Any -> OUT) : LiftedType(JSON::Any, OUT, T) forall OUT
@@ -52,4 +50,14 @@ abstract class Therapy::BaseType(T)
   end
 
   protected abstract def _coerce(value : _) : T
+
+  private def add_check(check : ParseContext(T) ->)
+    checks << Check(T).new(check)
+    self
+  end
+
+  private def add_validation(validation : T -> Bool, err_msg : String) : self
+    checks << Check(T).valid(err_msg, &validation)
+    self
+  end
 end

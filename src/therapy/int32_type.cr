@@ -1,12 +1,16 @@
 class Therapy::Int32Type < Therapy::BaseType(Int32)
   def min(min : Int32) : self
-    checks << Check(Int32).valid("Must be at least #{min}") { |i| i >= min }
-    self
+    add_validation(
+      ->(num : Int32) { num >= min },
+      "Must be at least #{min}"
+    )
   end
 
   def max(max : Int32) : self
-    checks << Check(Int32).valid("Must be at most #{max}") { |i| i <= max }
-    self
+    add_validation(
+      ->(num : Int32) { num <= max },
+      "Must be at most #{max}"
+    )
   end
 
   def coercing : self
