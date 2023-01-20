@@ -1,5 +1,20 @@
 # Notes
 
+## 01-19-2023
+
+I really love what I've built so far with this very. The API is very clean.
+The only thing I don't love right now is this "lifting" of single value validation/parsing
+to combine them for objects. This is where this library will greatly differ from Zod
+because not everything is a JSON object type thing. Rather than having to tell lower-level pieces how to
+parse their input from the larger context, I'd rather the higher-level pieces know how to
+pull from its context to hand to the lower-level. I think this will have to work with the "coercing"
+concept. By default I guess the input will be expected to be a named tuple? If you enable coercing,
+then it can use a hash, JSON, URI::Params.
+
+Only downside of this that I can think of is that it's limited to what I can foresee being useful.
+What if the user wants the input to be a class they defined? How do I make it flexible enough that
+they can still instruct the library how to parse their data?
+
 ## 01-11-2023
 
 Why not rewrite this library... AGAIN?!?!
