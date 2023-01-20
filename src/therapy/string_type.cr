@@ -56,12 +56,7 @@ class Therapy::StringType < Therapy::BaseType(String)
     add_check(->(ctx : ParseContext(String)) { ctx.value = ctx.value.strip })
   end
 
-  def coercing : self
-    @coercing = true
-    self
-  end
-
-  protected def coerce(value) : Result(String)
+  protected def coerce(value : Int32) : Result(String)
     Result::Success.new(value.to_s)
   end
 end

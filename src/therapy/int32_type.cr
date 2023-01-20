@@ -13,11 +13,6 @@ class Therapy::Int32Type < Therapy::BaseType(Int32)
     )
   end
 
-  def coercing : self
-    @coercing = true
-    self
-  end
-
   protected def coerce(value : String) : Result(Int32)
     if int = value.to_i32
       Result::Success.new(int)

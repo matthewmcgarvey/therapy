@@ -43,28 +43,28 @@ describe Therapy do
     f1.parse!("true").should eq(true)
     f1.parse!("false").should eq(false)
 
-    g = Therapy.string.lift(->(input : NamedTuple(key: String)) { input[:key] })
-    g.parse!({key: "value"}).should eq("value")
-
-    h = Therapy.object(key: f1.lift(->(input : NamedTuple(key: String)) { input[:key] }))
+    h = Therapy.object(key: f1).coercing
     h.parse!({key: "true"}).should eq({key: true})
 
-    i = Therapy.int32.from_json { |json| json["foo"].as_i? }
-    i.parse!(JSON.parse({foo: 123}.to_json)).should eq(123)
-
-    j = Therapy.bool.coercing.from_params { |params| params["admin"] }
+    # j
+    admin_vali = Therapy.bool.coercing
+    j = Therapy.object(admin: admin_vali).coercing
     params = URI::Params.new({"admin" => ["true"]})
-    j.parse!(params).should eq(true)
+    j.parse!(params).should eq({admin: true})
+    params2 = URI::Params.new(Hash(String, Array(String)).new)
+    expect_raises(Exception) { j.parse!(params2) }
+    hash1 = {"admin" => true}
+    j.parse!(hash1).should eq({admin: true})
 
     # k
-    email_vali = Therapy.string.from_json { |json| json["email"]?.try &.as_s? }
-    password_vali = Therapy.string.from_json { |json| json["password"]?.try &.as_s? }
-    confirm_vali = Therapy.string.from_json { |json| json["confirm"]?.try &.as_s? }
+    email_vali = Therapy.string
+    password_vali = Therapy.string
+    confirm_vali = Therapy.string
     k = Therapy.object(
       email: email_vali,
       password: password_vali,
       confirm: confirm_vali
-    )
+    ).coercing
     json1 = JSON.parse({
       email:    "foo@example.com",
       password: "abc123",
@@ -80,5 +80,11 @@ describe Therapy do
       confirm:  "abc123",
     }.to_json)
     expect_raises(Exception) { k.parse!(json2) }
+    json3 = JSON.parse({
+      email: 5,
+      password: "abc123",
+      confirm: "abc123"
+    }.to_json)
+    expect_raises(Exception) { k.parse!(json3) }
   end
 end

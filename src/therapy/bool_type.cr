@@ -1,9 +1,4 @@
 class Therapy::BoolType < Therapy::BaseType(Bool)
-  def coercing : self
-    @coercing = true
-    self
-  end
-
   protected def coerce(value : String) : Result(Bool)
     case value.downcase
     when "true"

@@ -24,7 +24,7 @@ abstract struct Therapy::Result(T)
     end
 
     def failure? : Bool
-      true
+      false
     end
 
     def errors : Array(Therapy::Error)

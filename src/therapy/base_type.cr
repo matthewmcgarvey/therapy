@@ -11,23 +11,21 @@ abstract class Therapy::BaseType(T)
   end
 
   def parse(input) : Result(T)
-    if input.nil?
-      return Result::Failure(T).new([Therapy::Error.new("Input was nil and expected it to be #{T}")])
-    end
+    coerced = do_coerce(input)
+    return coerced if coerced.failure?
 
-    context = ParseContext(T).create(input)
-    parse_context(context)
-  end
-
-  protected def parse_context(context : BaseParseContext(T, V)) : Result(T) forall V
-    if @coercing
-      coerced = coerce(context.value)
-      return coerced if coerced.failure?
-
-      context = ParseContext(T).create(coerced.value)
-    end
+    context = ParseContext(T).create(coerced.value)
     _parse(context)
     context.to_result
+  end
+
+  def create_parse_context(input : V) : BaseParseContext(T, V) forall V
+    ParseContext(T).create(input)
+  end
+
+  def coercing : self
+    @coercing = true
+    self
   end
 
   protected def _parse(context : ParseContext(T)) : Nil
@@ -38,23 +36,26 @@ abstract class Therapy::BaseType(T)
     context.add_error("Input was #{V} and expected it to be #{T}")
   end
 
-  def from_json(&block : JSON::Any -> OUT) : LiftedType(JSON::Any, OUT, T) forall OUT
-    lift(block)
+  protected def do_coerce(value : T) : Result(T)
+    Result::Success(T).new(value)
   end
 
-  def from_params(&block : URI::Params -> OUT) : LiftedType(URI::Params, OUT, T) forall OUT
-    lift(block)
-  end
-
-  def lift(fn : Proc(IN, OUT)) : LiftedType(IN, OUT, T) forall IN, OUT
-    Therapy::LiftedType(IN, OUT, T).new(self, fn)
+  protected def do_coerce(value) : Result(T)
+    if @coercing
+      coerce(value)
+    else
+      Result::Failure(T).with_msg("Expected #{T} got #{value.class}")
+    end
   end
 
   protected def coerce(value : T) : Result(T)
     Result::Success(T).new(value)
   end
 
-  protected abstract def coerce(value : _) : Result(T)
+  protected def coerce(value) : Result(T)
+    Result::Failure(T).with_msg("Expected #{T} got #{value.class}")
+  end
+
 
   private def add_check(check : ParseContext(T) ->)
     checks << Check(T).new(check)

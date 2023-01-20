@@ -19,15 +19,10 @@ module Therapy
 
   def self.object(**options : **T) forall T
   {% begin %}
-    {% for key, type in T %}
-      {% if type.name(generic_args: false) != "Therapy::LiftedType".id %}
-        {% raise "Expected #{key}: #{type} to be a Therapy::LiftedType but it was not" %}
-      {% end %}
-    {% end %}
-    {% in_type = T[T.keys.first].type_vars[0] %}
-    ObjectType({{ in_type }}, T, {
+    ObjectType(T, {
       {% for key, type in T %}
-        {{key.id}}: {{ type.type_vars[2] }},
+        {% base_type = type.ancestors.find { |ancestor| ancestor <= Therapy::BaseType } %}
+        {{key.id}}: {{ base_type.type_vars.first }},
       {% end %}
     }).new(options)
   {% end %}
