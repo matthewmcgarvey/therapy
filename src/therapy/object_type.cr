@@ -17,7 +17,7 @@ class Therapy::ObjectType(VALIDATORS, OUT) < Therapy::BaseType(OUT)
     end
   end
 
-  def _coerce(context : ParseContext(OUT, NamedTuple))
+  def _do_coerce(context : ParseContext(OUT, NamedTuple))
     context.map_result do |value|
       handle_coercion(context) do |key|
         value[key]?
@@ -25,7 +25,7 @@ class Therapy::ObjectType(VALIDATORS, OUT) < Therapy::BaseType(OUT)
     end
   end
 
-  def _coerce(context : ParseContext(OUT, JSON::Any))
+  def _do_coerce(context : ParseContext(OUT, JSON::Any))
     context.map_result do |value|
       handle_coercion(context) do |key|
         value[key.to_s]?.try(&.raw)
@@ -33,7 +33,7 @@ class Therapy::ObjectType(VALIDATORS, OUT) < Therapy::BaseType(OUT)
     end
   end
 
-  def _coerce(context : ParseContext(OUT, URI::Params))
+  def _do_coerce(context : ParseContext(OUT, URI::Params))
     context.map_result do |value|
       handle_coercion(context) do |key|
         value[key.to_s]?
@@ -41,7 +41,7 @@ class Therapy::ObjectType(VALIDATORS, OUT) < Therapy::BaseType(OUT)
     end
   end
 
-  def _coerce(context : ParseContext(OUT, Hash))
+  def _do_coerce(context : ParseContext(OUT, Hash))
     context.map_result do |value|
       handle_coercion(context) do |key|
         value[key]? || value[key.to_s]?

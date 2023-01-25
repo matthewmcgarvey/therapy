@@ -22,7 +22,7 @@ class Therapy::ArrayType(T) < Therapy::BaseType(Array(T))
     end
   end
 
-  protected def _coerce(context : ParseContext(Array(T), Array))
+  protected def _do_coerce(context : ParseContext(Array(T), Array))
     context.map_result do |arr|
       results = arr.map_with_index do |value, idx|
         sub_context = validator.create_subcontext(context, value, path: idx)
@@ -38,7 +38,7 @@ class Therapy::ArrayType(T) < Therapy::BaseType(Array(T))
     end
   end
 
-  protected def _coerce(context : ParseContext(Array(T), JSON::Any))
+  protected def _do_coerce(context : ParseContext(Array(T), JSON::Any))
     context.map_result do |val|
       if arr = val.as_a?
         results = arr.map_with_index do |value, idx|

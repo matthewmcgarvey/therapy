@@ -17,7 +17,7 @@ abstract class Therapy::BaseType(T)
   end
 
   def create_subcontext(parent : ParseContext, input : V, path) : ParseContext(T, V) forall V
-    SubContext(T, V, typeof(parent)).new(parent, input, path)
+    SubContext(T, V, typeof(parent)).new(parent, input, path).as(ParseContext(T, V))
   end
 
   def coercing : self
@@ -37,9 +37,9 @@ abstract class Therapy::BaseType(T)
     context
   end
 
-  protected def coerce(context : ParseContext(T, V)) forall V
+  protected def coerce(context : ParseContext)
     if @coercing
-      _coerce(context)
+      _do_coerce(context)
     elsif context.value.is_a?(T)
       context.map(&.as(T))
     else
@@ -48,7 +48,7 @@ abstract class Therapy::BaseType(T)
     end
   end
 
-  protected def _coerce(context : ParseContext(T, V)) forall V
+  protected def _do_coerce(context : ParseContext) forall V
     context.map_result { |value| _coerce(value) }
   end
 

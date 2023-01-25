@@ -104,5 +104,12 @@ describe Therapy do
     l1 = Therapy.array(Therapy.int32.coercing).coercing
     l1.parse!(["1"]).should eq([1])
     l1.parse!(JSON.parse([1].to_json)).should eq([1])
+
+    # m
+    m = Therapy.tuple(Therapy.string, Therapy.int32).coercing
+    m.parse!(["hello", 42]).should eq({"hello", 42})
+
+    m1 = Therapy.tuple(Therapy.string.coercing, Therapy.int32.coercing).coercing
+    m1.parse!(JSON.parse(["hello", 42].to_json)).should eq({"hello", 42})
   end
 end

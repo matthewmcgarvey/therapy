@@ -31,4 +31,15 @@ module Therapy
   def self.array(of validator : BaseType(T)) forall T
     ArrayType(T).new(validator)
   end
+
+  def self.tuple(*options : *T) forall T
+  {% begin %}
+    TupleType(T, {
+      {% for type in T %}
+        {% base_type = type.ancestors.find { |ancestor| ancestor <= Therapy::BaseType } %}
+        {{ base_type.type_vars.first }},
+      {% end %}
+    }).new(options)
+  {% end %}
+  end
 end
