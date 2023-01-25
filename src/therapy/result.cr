@@ -51,7 +51,7 @@ abstract struct Therapy::Result(T)
     end
 
     def value : T
-      raise errors.map(&.message).join(", ")
+      raise errors.map(&.to_s).join(", ")
     end
   end
 end

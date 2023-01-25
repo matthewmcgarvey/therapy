@@ -16,7 +16,7 @@ class Therapy::OptionalType(T) < Therapy::BaseType(T?)
     end
   end
 
-  def coerce(value) : Result(T?)
+  def _coerce(value) : Result(T?)
     return Result::Success(T?).new(nil) if value.nil?
 
     inner.coerce(value)

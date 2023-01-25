@@ -64,7 +64,9 @@ describe Therapy do
       email: email_vali,
       password: password_vali,
       confirm: confirm_vali
-    ).coercing
+    ).coercing.validate("Confirm must match password") do |form|
+      form[:password] == form[:confirm]
+    end
     json1 = JSON.parse({
       email:    "foo@example.com",
       password: "abc123",
@@ -86,5 +88,11 @@ describe Therapy do
       confirm: "abc123"
     }.to_json)
     expect_raises(Exception) { k.parse!(json3) }
+    json4 = JSON.parse({
+      email: "foo@example.com",
+      password: "abc123",
+      confirm: "not-abc123"
+    }.to_json)
+    expect_raises(Exception) { k.parse!(json4) }
   end
 end

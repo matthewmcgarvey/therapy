@@ -13,7 +13,7 @@ class Therapy::Int32Type < Therapy::BaseType(Int32)
     )
   end
 
-  protected def coerce(value : String) : Result(Int32)
+  protected def _coerce(value : String) : Result(Int32)
     if int = value.to_i32
       Result::Success.new(int)
     else
@@ -21,7 +21,7 @@ class Therapy::Int32Type < Therapy::BaseType(Int32)
     end
   end
 
-  protected def coerce(value : Bool) : Result(Int32)
+  protected def _coerce(value : Bool) : Result(Int32)
     Result::Success.new(value ? 1 : 0)
   end
 end

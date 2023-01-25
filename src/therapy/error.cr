@@ -5,4 +5,12 @@ class Therapy::Error
 
   def initialize(@message, @path = [] of String | Int32)
   end
+
+  def to_s : String
+    if path.empty?
+      message
+    else
+      "#{path}: #{message}"
+    end
+  end
 end

@@ -10,17 +10,14 @@ abstract class Therapy::BaseType(T)
     parse(input).value
   end
 
-  def parse(input) : Result(T)
-    coerced = do_coerce(input)
-    return coerced if coerced.failure?
-
-    context = ParseContext(T).create(coerced.value)
+  def parse(input : V) : Result(T) forall V
+    context = coerce(ParseContext(T, V).new(input))
     _parse(context)
     context.to_result
   end
 
-  def create_parse_context(input : V) : BaseParseContext(T, V) forall V
-    ParseContext(T).create(input)
+  def create_subcontext(parent : ParseContext, input : V, path) : ParseContext(T, V) forall V
+    SubContext(T, V, typeof(parent)).new(parent, input, path)
   end
 
   def coercing : self
@@ -28,36 +25,43 @@ abstract class Therapy::BaseType(T)
     self
   end
 
-  protected def _parse(context : ParseContext(T)) : Nil
+  protected def _parse(context : ParseContext(T, T)) : Nil
     checks.each(&.check(context))
   end
 
-  protected def _parse(context : BaseParseContext(T, V)) : Nil forall V
-    context.add_error("Input was #{V} and expected it to be #{T}")
+  protected def _parse(context) : Nil forall V
+    # do nothing
   end
 
-  protected def do_coerce(value : T) : Result(T)
-    Result::Success(T).new(value)
+  protected def coerce(context : ParseContext(T, T)) : ParseContext(T, T)
+    context
   end
 
-  protected def do_coerce(value) : Result(T)
+  protected def coerce(context : ParseContext(T, V)) forall V
     if @coercing
-      coerce(value)
+      _coerce(context)
+    elsif context.value.is_a?(T)
+      context.map(&.as(T))
     else
-      Result::Failure(T).with_msg("Expected #{T} got #{value.class}")
+      context.add_error("Expected #{T} got #{context.value.class}")
+      context
     end
   end
 
-  protected def coerce(value : T) : Result(T)
+  protected def _coerce(context : ParseContext(T, V)) forall V
+    context.map_result { |value| _coerce(value) }
+  end
+
+  protected def _coerce(value : T) : Result(T)
     Result::Success(T).new(value)
   end
 
-  protected def coerce(value) : Result(T)
+  protected def _coerce(value) : Result(T)
     Result::Failure(T).with_msg("Expected #{T} got #{value.class}")
   end
 
 
-  private def add_check(check : ParseContext(T) ->)
+  private def add_check(&check : ParseContext(T, T) -> Nil)
     checks << Check(T).new(check)
     self
   end

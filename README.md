@@ -33,10 +33,10 @@ TODO: Write development instructions here
 
 ## TODO
 
-- Get path working on the context
-- Errors need to have the path
 - Add array support
-- Add validations to objects (confirmation == password)
+- Support enums
+- Nested objects
+- Arbitrary nesting
 
 ## Contributing
 
