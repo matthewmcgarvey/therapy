@@ -33,10 +33,13 @@ TODO: Write development instructions here
 
 ## TODO
 
-- Add array support
 - Support enums
+- Support tuples
+  - I made arrays take in one validation and all items expected to conform that that
 - Nested objects
 - Arbitrary nesting
+- Change how handling of json works
+  - I don't remember why I decided that the base types wouldn't coerce JSON::Any themselves
 
 ## Contributing
 

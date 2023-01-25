@@ -1,5 +1,10 @@
 # Notes
 
+## 01-24-2023
+
+Just want to make anote that I'm trying to add ArrayType right now by referencing ObjectType and I'm
+having a hard time understanding how ObjectType works 😂
+
 ## 01-19-2023
 
 I really love what I've built so far with this very. The API is very clean.

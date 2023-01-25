@@ -94,5 +94,15 @@ describe Therapy do
       confirm: "not-abc123"
     }.to_json)
     expect_raises(Exception) { k.parse!(json4) }
+
+    # l
+    l = Therapy.array(Therapy.string)
+    l.parse!(["hello", "world"]).should eq(["hello", "world"])
+    expect_raises(Exception) { l.parse!("not an array") }
+    expect_raises(Exception) { l.parse!([1, 2]) }
+
+    l1 = Therapy.array(Therapy.int32.coercing).coercing
+    l1.parse!(["1"]).should eq([1])
+    l1.parse!(JSON.parse([1].to_json)).should eq([1])
   end
 end

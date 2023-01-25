@@ -14,11 +14,15 @@ class Therapy::Int32Type < Therapy::BaseType(Int32)
   end
 
   protected def _coerce(value : String) : Result(Int32)
-    if int = value.to_i32
+    if int = value.to_i32?
       Result::Success.new(int)
     else
       Result::Failure(Int32).with_msg("Can't turn String into Int32")
     end
+  end
+
+  protected def _coerce(value : Int64) : Result(Int32)
+    Result::Success.new(value.to_i32!)
   end
 
   protected def _coerce(value : Bool) : Result(Int32)

@@ -27,4 +27,8 @@ module Therapy
     }).new(options)
   {% end %}
   end
+
+  def self.array(of validator : BaseType(T)) forall T
+    ArrayType(T).new(validator)
+  end
 end
