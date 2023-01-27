@@ -34,12 +34,13 @@ TODO: Write development instructions here
 ## TODO
 
 - Support enums
-- Support tuples
-  - I made arrays take in one validation and all items expected to conform that that
 - Nested objects
 - Arbitrary nesting
-- Change how handling of json works
-  - I don't remember why I decided that the base types wouldn't coerce JSON::Any themselves
+- Cascade coercion so that you don't have to specify it on every attribute
+  - This could be a bad idea
+  - I want to be able to coerce json, not necessarily coerce ints to string
+  - What I _really_ want is for json parsing to turn fields into the string value when the parent is coercing
+  - this is probably why I originally had object pulling the raw value from JSON::Any when passing to coerce instead of passing the json
 
 ## Contributing
 

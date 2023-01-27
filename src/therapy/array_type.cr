@@ -42,7 +42,7 @@ class Therapy::ArrayType(T) < Therapy::BaseType(Array(T))
     context.map_result do |val|
       if arr = val.as_a?
         results = arr.map_with_index do |value, idx|
-          sub_context = validator.create_subcontext(context, value.raw, path: idx)
+          sub_context = validator.create_subcontext(context, value, path: idx)
           validator.coerce(sub_context).to_result
         end
 

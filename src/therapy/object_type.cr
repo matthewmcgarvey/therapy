@@ -28,7 +28,7 @@ class Therapy::ObjectType(VALIDATORS, OUT) < Therapy::BaseType(OUT)
   def _do_coerce(context : ParseContext(OUT, JSON::Any))
     context.map_result do |value|
       handle_coercion(context) do |key|
-        value[key.to_s]?.try(&.raw)
+        value[key.to_s]?
       end
     end
   end

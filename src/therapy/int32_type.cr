@@ -28,4 +28,8 @@ class Therapy::Int32Type < Therapy::BaseType(Int32)
   protected def _coerce(value : Bool) : Result(Int32)
     Result::Success.new(value ? 1 : 0)
   end
+
+  protected def _coerce(value : JSON::Any) : Result(Int32)
+    _coerce(value.raw)
+  end
 end

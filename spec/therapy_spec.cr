@@ -57,13 +57,10 @@ describe Therapy do
     j.parse!(hash1).should eq({admin: true})
 
     # k
-    email_vali = Therapy.string
-    password_vali = Therapy.string
-    confirm_vali = Therapy.string
     k = Therapy.object(
-      email: email_vali,
-      password: password_vali,
-      confirm: confirm_vali
+      email: Therapy.string.coercing,
+      password: Therapy.string.coercing,
+      confirm: Therapy.string.coercing
     ).coercing.validate("Confirm must match password") do |form|
       form[:password] == form[:confirm]
     end
@@ -111,5 +108,12 @@ describe Therapy do
 
     m1 = Therapy.tuple(Therapy.string.coercing, Therapy.int32.coercing).coercing
     m1.parse!(JSON.parse(["hello", 42].to_json)).should eq({"hello", 42})
+
+    # n
+    n = Therapy.object(
+      roles: Therapy.array(Therapy.string.coercing).coercing
+    ).coercing
+    n.parse!({roles: ["admin"]}).should eq({roles: ["admin"]})
+    n.parse!(JSON.parse({roles: ["admin"]}.to_json)).should eq({roles: ["admin"]})
   end
 end

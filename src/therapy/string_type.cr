@@ -61,4 +61,8 @@ class Therapy::StringType < Therapy::BaseType(String)
   protected def _coerce(value : Int32) : Result(String)
     Result::Success.new(value.to_s)
   end
+
+  protected def _coerce(value : JSON::Any) : Result(String)
+    _coerce(value.raw)
+  end
 end

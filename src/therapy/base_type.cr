@@ -37,7 +37,31 @@ abstract class Therapy::BaseType(T)
     context
   end
 
+  protected def coerce(context : ParseContext(T, V?)) : ParseContext(T, V?) | ParseContext(T, V) | ParseContext(T, T) forall V
+    new_context = context.map_result do |val|
+      if val.nil?
+        Result::Failure(V).with_msg("Expected #{T} got nil")
+      else
+        Result::Success(V).new(val.not_nil!)
+      end
+    end
+    if new_context.is_a?(ParseContext(T, V))
+      do_the_thing(new_context)
+    else
+      new_context
+    end
+  end
+
+  protected def coerce(context : ParseContext(T, V)) : ParseContext(T, V) | ParseContext(T, T) forall V
+    do_the_thing(context)
+  end
+
   protected def coerce(context : ParseContext)
+    context.add_error("Something went wrong")
+    context
+  end
+
+  private def do_the_thing(context : ParseContext(T, V)) : ParseContext(T, V) | ParseContext(T, T) forall V
     if @coercing
       _do_coerce(context)
     elsif context.value.is_a?(T)
@@ -48,7 +72,7 @@ abstract class Therapy::BaseType(T)
     end
   end
 
-  protected def _do_coerce(context : ParseContext) forall V
+  protected def _do_coerce(context : ParseContext(T, V)) : ParseContext(T, V) | ParseContext(T, T) forall V
     context.map_result { |value| _coerce(value) }
   end
 
@@ -56,12 +80,12 @@ abstract class Therapy::BaseType(T)
     Result::Success(T).new(value)
   end
 
-  protected def _coerce(value) : Result(T)
-    Result::Failure(T).with_msg("Expected #{T} got #{value.class}")
+  protected def _coerce(value : V) : Result(T) forall V
+    Result::Failure(T).with_msg("_coerce: Expected #{T} got #{value.class}")
   end
 
 
-  private def add_check(&check : ParseContext(T, T) -> Nil)
+  private def add_check(&check : ParseContext(T, T) -> Nil) : self
     checks << Check(T).new(check)
     self
   end

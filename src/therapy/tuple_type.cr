@@ -25,8 +25,7 @@ class Therapy::TupleType(VALIDATORS, OUT) < Therapy::BaseType(OUT)
 
   protected def _do_coerce(context : ParseContext(OUT, Array))
     context.map_result do |val|
-      results = validators.map_with_index do |validator, idx|
-        value = val[idx]?
+      results = val.zip(validators).map_with_index do |(value, validator), idx|
         sub_context = validator.create_subcontext(context, value, path: idx)
         validator.coerce(sub_context).to_result
       end
