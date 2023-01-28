@@ -34,8 +34,6 @@ TODO: Write development instructions here
 ## TODO
 
 - Support enums
-- Nested objects
-- Arbitrary nesting
 - Cascade coercion so that you don't have to specify it on every attribute
   - This could be a bad idea
   - I want to be able to coerce json, not necessarily coerce ints to string

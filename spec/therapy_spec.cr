@@ -115,5 +115,27 @@ describe Therapy do
     ).coercing
     n.parse!({roles: ["admin"]}).should eq({roles: ["admin"]})
     n.parse!(JSON.parse({roles: ["admin"]}.to_json)).should eq({roles: ["admin"]})
+
+    n1 = Therapy.object(
+      users: Therapy.array(
+        Therapy.object(
+          name: Therapy.string.coercing,
+          email: Therapy.string.coercing
+        ).coercing
+      ).coercing
+    ).coercing
+    expected = {
+      users: [
+        {
+          name: "Mike Tyson",
+          email: "foo@example.com"
+        },
+        {
+          name: "Jason Bourne",
+          email: "bar@example.com"
+        }
+      ]
+    }
+    n1.parse!(JSON.parse(expected.to_json)).should eq(expected)
   end
 end
