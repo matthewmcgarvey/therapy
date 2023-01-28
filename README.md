@@ -19,10 +19,16 @@ Get it? Therapy... validation... come on!
 ```crystal
 require "therapy"
 
-therapy = Therapy.for(request.form)
-email = therapy.parse_str("email").value
-password = therapy.parse_str("password").value
-therapy.parse_str("password_confirmation").eq(password_validation.value?).valid!
+sign_up_form = Therapy.object(
+  email: Therapy.string.coercing,
+  password: Therapy.string.coercing,
+  confirm: Therapy.string.coercing
+).coercing.validate("Confirm must match password") do |form|
+  form[:password] == form[:confirm]
+end
+
+json = JSON.parse(request.body)
+sign_up = sign_up_form.parse!(json) #=> NamedTuple(email: String, password: String, confirm: String)
 ```
 
 TODO: Write usage instructions here
@@ -39,6 +45,8 @@ TODO: Write development instructions here
   - I want to be able to coerce json, not necessarily coerce ints to string
   - What I _really_ want is for json parsing to turn fields into the string value when the parent is coercing
   - this is probably why I originally had object pulling the raw value from JSON::Any when passing to coerce instead of passing the json
+- Allow specifying the path on the object validation
+  - When checking password confirmation, the path of the error should point towards it
 
 ## Contributing
 
