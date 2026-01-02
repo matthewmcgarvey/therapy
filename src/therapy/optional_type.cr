@@ -16,9 +16,29 @@ class Therapy::OptionalType(T) < Therapy::BaseType(T?)
     end
   end
 
-  def _coerce(value) : Result(T?)
-    return Result::Success(T?).new(nil) if value.nil?
+  # Value is nil
+  protected def coerce(context : ParseContext(T?, Nil)) : ParseContext(T?, T?)
+    context.map_result do |val|
+      Result::Success(T?).new(val)
+    end
+  end
 
-    inner.coerce(value)
+  # Need to pull out raw value for coercing
+  protected def coerce(context : ParseContext(T?, JSON::Any?))
+    coerce(context.map(&.try(&.raw)))
+  end
+
+  # Pass non-nil value to inner validator
+  protected def coerce(context : ParseContext(T?, V)) forall V
+    context.map_result do |val|
+      if val.nil?
+        Result::Success(T?).new(val)
+      else
+        subcontext = inner.create_subcontext(context, val, 0)
+        subcontext = inner.coerce(subcontext)
+        inner._parse(subcontext)
+        subcontext.to_result.map(&.as(T?))
+      end
+    end
   end
 end

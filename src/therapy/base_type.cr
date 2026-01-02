@@ -1,5 +1,4 @@
 abstract class Therapy::BaseType(T)
-  @coercing : Bool = false
   private getter checks = [] of Check(T)
 
   def optional : OptionalType(T)
@@ -20,11 +19,6 @@ abstract class Therapy::BaseType(T)
     SubContext(T, V, typeof(parent)).new(parent, input, path).as(ParseContext(T, V))
   end
 
-  def coercing : self
-    @coercing = true
-    self
-  end
-
   protected def _parse(context : ParseContext(T, T)) : Nil
     checks.each(&.check(context))
   end
@@ -40,36 +34,25 @@ abstract class Therapy::BaseType(T)
   protected def coerce(context : ParseContext(T, V?)) : ParseContext(T, V?) | ParseContext(T, V) | ParseContext(T, T) forall V
     new_context = context.map_result do |val|
       if val.nil?
-        Result::Failure(V).with_msg("Expected #{T} got nil")
+        Result::Failure(V).with_msg("Expected #{T} got #{val.class}")
       else
         Result::Success(V).new(val.not_nil!)
       end
     end
-    if new_context.is_a?(ParseContext(T, V))
-      do_the_thing(new_context)
+    if new_context.is_a?(ParseContext(T, V)) && !new_context.errors.present?
+      _do_coerce(new_context)
     else
       new_context
     end
   end
 
   protected def coerce(context : ParseContext(T, V)) : ParseContext(T, V) | ParseContext(T, T) forall V
-    do_the_thing(context)
+    _do_coerce(context)
   end
 
   protected def coerce(context : ParseContext)
     context.add_error("Something went wrong")
     context
-  end
-
-  private def do_the_thing(context : ParseContext(T, V)) : ParseContext(T, V) | ParseContext(T, T) forall V
-    if @coercing
-      _do_coerce(context)
-    elsif context.value.is_a?(T)
-      context.map(&.as(T))
-    else
-      context.add_error("Expected #{T} got #{context.value.class}")
-      context
-    end
   end
 
   protected def _do_coerce(context : ParseContext(T, V)) : ParseContext(T, V) | ParseContext(T, T) forall V
@@ -81,9 +64,8 @@ abstract class Therapy::BaseType(T)
   end
 
   protected def _coerce(value : V) : Result(T) forall V
-    Result::Failure(T).with_msg("_coerce: Expected #{T} got #{value.class}")
+    Result::Failure(T).with_msg("Expected #{T} got #{value.class}")
   end
-
 
   private def add_check(&check : ParseContext(T, T) -> Nil) : self
     checks << Check(T).new(check)

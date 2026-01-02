@@ -18,7 +18,7 @@ module Therapy
   end
 
   def self.object(**options : **T) forall T
-  {% begin %}
+    {% begin %}
     ObjectType(T, {
       {% for key, type in T %}
         {% base_type = type.ancestors.find { |ancestor| ancestor <= Therapy::BaseType } %}
@@ -33,7 +33,7 @@ module Therapy
   end
 
   def self.tuple(*options : *T) forall T
-  {% begin %}
+    {% begin %}
     TupleType(T, {
       {% for type in T %}
         {% base_type = type.ancestors.find { |ancestor| ancestor <= Therapy::BaseType } %}

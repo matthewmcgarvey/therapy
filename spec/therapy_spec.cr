@@ -2,21 +2,16 @@ require "./spec_helper"
 
 describe Therapy do
   it "works" do
-    a = Therapy.string.coercing.optional
+    a = Therapy.string.optional
     a.parse!("abc").should eq("abc")
     a.parse!(nil).should eq(nil)
-    a.parse!(5).should eq("5")
+    expect_raises(Exception) { a.parse!(5) }
 
-    b = Therapy.int32.coercing
+    b = Therapy.int32
     b.parse!(5).should eq(5)
-    b.parse!("5").should eq(5)
-    b.parse!(true).should eq(1)
+    expect_raises(Exception) { b.parse!("5") }
+    expect_raises(Exception) { b.parse!(true) }
     expect_raises(Exception) { b.parse!(nil) }
-
-    b1 = Therapy.int32
-    b1.parse!(5).should eq(5)
-    expect_raises(Exception) { b1.parse!("5") }
-    expect_raises(Exception) { b1.parse!(nil) }
 
     b2 = Therapy.int32.min(2).max(9)
     b2.parse!(2).should eq(2)
@@ -38,17 +33,17 @@ describe Therapy do
     f = Therapy.bool
     f.parse!(true).should eq(true)
 
-    f1 = Therapy.bool.coercing
+    f1 = Therapy.bool
     f1.parse!(true).should eq(true)
     f1.parse!("true").should eq(true)
     f1.parse!("false").should eq(false)
 
-    h = Therapy.object(key: f1).coercing
+    h = Therapy.object(key: f1)
     h.parse!({key: "true"}).should eq({key: true})
 
     # j
-    admin_vali = Therapy.bool.coercing
-    j = Therapy.object(admin: admin_vali).coercing
+    admin_vali = Therapy.bool
+    j = Therapy.object(admin: admin_vali)
     params = URI::Params.new({"admin" => ["true"]})
     j.parse!(params).should eq({admin: true})
     params2 = URI::Params.new(Hash(String, Array(String)).new)
@@ -58,10 +53,10 @@ describe Therapy do
 
     # k
     k = Therapy.object(
-      email: Therapy.string.coercing,
-      password: Therapy.string.coercing,
-      confirm: Therapy.string.coercing
-    ).coercing.validate("Confirm must match password") do |form|
+      email: Therapy.string,
+      password: Therapy.string,
+      confirm: Therapy.string
+    ).validate("Confirm must match password") do |form|
       form[:password] == form[:confirm]
     end
     json1 = JSON.parse({
@@ -80,15 +75,15 @@ describe Therapy do
     }.to_json)
     expect_raises(Exception) { k.parse!(json2) }
     json3 = JSON.parse({
-      email: 5,
+      email:    5,
       password: "abc123",
-      confirm: "abc123"
+      confirm:  "abc123",
     }.to_json)
     expect_raises(Exception) { k.parse!(json3) }
     json4 = JSON.parse({
-      email: "foo@example.com",
+      email:    "foo@example.com",
       password: "abc123",
-      confirm: "not-abc123"
+      confirm:  "not-abc123",
     }.to_json)
     expect_raises(Exception) { k.parse!(json4) }
 
@@ -98,43 +93,43 @@ describe Therapy do
     expect_raises(Exception) { l.parse!("not an array") }
     expect_raises(Exception) { l.parse!([1, 2]) }
 
-    l1 = Therapy.array(Therapy.int32.coercing).coercing
-    l1.parse!(["1"]).should eq([1])
+    l1 = Therapy.array(Therapy.int32)
+    expect_raises(Exception) { l1.parse!(["1"]) }
     l1.parse!(JSON.parse([1].to_json)).should eq([1])
 
     # m
-    m = Therapy.tuple(Therapy.string, Therapy.int32).coercing
+    m = Therapy.tuple(Therapy.string, Therapy.int32)
     m.parse!(["hello", 42]).should eq({"hello", 42})
 
-    m1 = Therapy.tuple(Therapy.string.coercing, Therapy.int32.coercing).coercing
+    m1 = Therapy.tuple(Therapy.string, Therapy.int32)
     m1.parse!(JSON.parse(["hello", 42].to_json)).should eq({"hello", 42})
 
     # n
     n = Therapy.object(
-      roles: Therapy.array(Therapy.string.coercing).coercing
-    ).coercing
+      roles: Therapy.array(Therapy.string)
+    )
     n.parse!({roles: ["admin"]}).should eq({roles: ["admin"]})
     n.parse!(JSON.parse({roles: ["admin"]}.to_json)).should eq({roles: ["admin"]})
 
     n1 = Therapy.object(
       users: Therapy.array(
         Therapy.object(
-          name: Therapy.string.coercing,
-          email: Therapy.string.coercing
-        ).coercing
-      ).coercing
-    ).coercing
+          name: Therapy.string,
+          email: Therapy.string
+        )
+      )
+    )
     expected = {
       users: [
         {
-          name: "Mike Tyson",
-          email: "foo@example.com"
+          name:  "Mike Tyson",
+          email: "foo@example.com",
         },
         {
-          name: "Jason Bourne",
-          email: "bar@example.com"
-        }
-      ]
+          name:  "Jason Bourne",
+          email: "bar@example.com",
+        },
+      ],
     }
     n1.parse!(JSON.parse(expected.to_json)).should eq(expected)
   end

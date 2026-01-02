@@ -49,15 +49,17 @@ class Therapy::ObjectType(VALIDATORS, OUT) < Therapy::BaseType(OUT)
     end
   end
 
-  private def handle_coercion(context)
+  private def handle_coercion(context, &)
     with_handling do |key, validator|
       value = yield key
       sub_context = validator.create_subcontext(context, value, path: key)
-      {key, validator.coerce(sub_context).to_result}
+      sub_context = validator.coerce(sub_context)
+      validator._parse(sub_context)
+      {key, sub_context.to_result}
     end
   end
 
-  private def with_parse_handling(context)
+  private def with_parse_handling(context, &)
     results = validators.map do |key, validator|
       yield key, validator
     end
@@ -74,7 +76,7 @@ class Therapy::ObjectType(VALIDATORS, OUT) < Therapy::BaseType(OUT)
     end
   end
 
-  private def with_handling
+  private def with_handling(&)
     results = validators.map do |key, validator|
       yield key, validator
     end
@@ -83,7 +85,12 @@ class Therapy::ObjectType(VALIDATORS, OUT) < Therapy::BaseType(OUT)
       hash = results.map { |res| {res[0], res[1].value} }.to_h
       Result::Success(OUT).new(OUT.from(hash))
     else
-      errors = results.flat_map { |res| res[1].errors }
+      errors = [] of Therapy::Error
+      results.each do |res|
+        attr_errors = res[1].errors
+        attr_errors.each { |err| err.path << res[0].to_s }
+        errors += attr_errors
+      end
       Result::Failure(OUT).new(errors)
     end
   end

@@ -2,21 +2,21 @@ class Therapy::StringType < Therapy::BaseType(String)
   def min(size : Int32) : self
     add_validation(
       ->(str : String) { str.size >= size },
-      "Must be at least #{size}"
+      "Must have minimum size of #{size}"
     )
   end
 
   def max(size : Int32) : self
     add_validation(
       ->(str : String) { str.size <= size },
-      "Must be at most #{size}"
+      "Must have maximum size of #{size}"
     )
   end
 
   def size(size : Int32) : self
     add_validation(
       ->(str : String) { str.size == size },
-      "Must be exactly #{size}"
+      "Must have exact size of #{size}"
     )
   end
 
@@ -56,10 +56,6 @@ class Therapy::StringType < Therapy::BaseType(String)
     add_check do |ctx|
       ctx.value = ctx.value.strip
     end
-  end
-
-  protected def _coerce(value : Int32) : Result(String)
-    Result::Success.new(value.to_s)
   end
 
   protected def _coerce(value : JSON::Any) : Result(String)

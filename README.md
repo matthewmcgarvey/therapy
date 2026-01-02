@@ -20,10 +20,10 @@ Get it? Therapy... validation... come on!
 require "therapy"
 
 sign_up_form = Therapy.object(
-  email: Therapy.string.coercing,
-  password: Therapy.string.coercing,
-  confirm: Therapy.string.coercing
-).coercing.validate("Confirm must match password") do |form|
+  email: Therapy.string,
+  password: Therapy.string,
+  confirm: Therapy.string
+).validate("Confirm must match password") do |form|
   form[:password] == form[:confirm]
 end
 

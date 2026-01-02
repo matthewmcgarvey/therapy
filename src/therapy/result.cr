@@ -4,6 +4,10 @@ abstract struct Therapy::Result(T)
   abstract def value : T
   abstract def errors : Array(Therapy::Error)
 
+  def valid? : Bool
+    success?
+  end
+
   def map(&block : T -> Y) : Result(Y) forall Y
     if success?
       new_value = yield value
