@@ -16,7 +16,7 @@ describe Therapy::ObjectType do
     validation.parse!(json).should eq({roles: ["admin", "user"]})
   end
 
-  it "handles optionaly array attribute from json" do
+  it "handles optional array attribute from json" do
     json_attr_missing = JSON.parse("{\"id\": 123}")
     json_attr_null = JSON.parse(<<-JSON)
       {
