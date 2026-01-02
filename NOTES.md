@@ -1,5 +1,22 @@
 # Notes
 
+## 01-02-2026
+
+3 years later...
+I've fixed several bugs in the code but there's way more lurking, I just don't know about them yet and haven't written too many tests.
+As I write more, the types become more and more convuluted and I've had to just remove return types and things because I cannot understand how to type it appropriately (see the OptionalType).
+I did a terrible job with the `parse -> _parse -> coerce -> _do_coerce -> _coerce`. Who knows if that's even correct, but that is a crazy flow.
+I think the idea is
+- parse takes in a raw type and returns a result
+- _parse takes in the parse context to run checks (which are validations or modifications (string's strip function)) & returns nothing
+- coerce takes in the parse context and returns a new parse context that either successfully coerced the type or failed
+- _do_coerce also takes in the parse context ?
+- _coerce takes in the raw value and returns a result
+So, writing that out, I think _do_coerce could be removed, but I'm not sure. They all need better names though.
+Coming back, I still think this is my ideal way of parsing json or form input.
+I looked at <https://github.com/qequ/schematics> but it can't handle required input without making the type optional.
+One thing I might consider adding is a way to parse an object into a class instead of only working with named tuples.
+
 ## 01-24-2023
 
 Just want to make anote that I'm trying to add ArrayType right now by referencing ObjectType and I'm
