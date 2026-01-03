@@ -35,6 +35,12 @@ describe Therapy::ObjectType do
     validation.parse!({key: "true"}).should eq({key: true})
   end
 
+  it "ignores extra attributes on input" do
+    validation = Therapy.object(key: Therapy.string)
+
+    validation.parse!({key: "foo", other: 123}).should eq({key: "foo"})
+  end
+
   context "URI::Params" do
     it "single value" do
       params = URI::Params.new({"admin" => ["true"]})
