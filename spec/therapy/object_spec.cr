@@ -49,5 +49,12 @@ describe Therapy::ObjectType do
 
       validation.parse!(params).should eq({colors: ["red", "blue"]})
     end
+
+    it "array value as tuple" do
+      params = URI::Params.new({"colors" => ["red", "blue"]})
+      validation = Therapy.object(colors: Therapy.tuple(Therapy.string, Therapy.string))
+
+      validation.parse!(params).should eq({colors: {"red", "blue"}})
+    end
   end
 end

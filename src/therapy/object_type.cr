@@ -32,7 +32,7 @@ class Therapy::ObjectType(VALIDATORS, OUT) < Therapy::BaseType(OUT)
 
   protected def _coerce(value : URI::Params) : Result(OUT)
     coercing_each do |key, validator|
-      val = if validator.is_a?(ArrayType)
+      val = if validator.is_a?(ArrayType) || validator.is_a?(TupleType)
               value.fetch_all(key.to_s)
             else
               value[key.to_s]?

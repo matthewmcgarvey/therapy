@@ -32,16 +32,12 @@ abstract class Therapy::BaseType(T)
   end
 
   protected def coerce(context : ParseContext(T, V)) : ParseContext(T, V) | ParseContext(T, T) forall V
-    _do_coerce(context)
+    context.map_result { |value| _coerce(value) }
   end
 
   protected def coerce(context : ParseContext)
     context.add_error("Something went wrong")
     context
-  end
-
-  protected def _do_coerce(context : ParseContext(T, V)) : ParseContext(T, V) | ParseContext(T, T) forall V
-    context.map_result { |value| _coerce(value) }
   end
 
   protected def _coerce(value : T) : Result(T)

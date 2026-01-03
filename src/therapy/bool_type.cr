@@ -9,4 +9,8 @@ class Therapy::BoolType < Therapy::BaseType(Bool)
       Result::Failure(Bool).with_msg("Not coercable to bool")
     end
   end
+
+  protected def _coerce(value : JSON::Any) : Result(Bool)
+    _coerce(value.raw)
+  end
 end
