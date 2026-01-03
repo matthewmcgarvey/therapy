@@ -1,8 +1,10 @@
 class Therapy::ParseContext(T, V)
   getter errors = [] of Therapy::Error
+  getter full_path : Array(String | Int32)
   property value : V
 
   def initialize(@value)
+    @full_path = [] of String | Int32
   end
 
   def add_error(msg : String)
@@ -31,25 +33,19 @@ class Therapy::ParseContext(T, V)
       Result::Failure(T).new(errors)
     end
   end
-
-  def full_path : Array(String | Int32)
-    [] of String | Int32
-  end
 end
 
 class Therapy::SubContext(T, V, PARENT) < Therapy::ParseContext(T, V)
   private getter parent : PARENT
   property value : V
-  property path : String | Symbol | Int32
+  getter path : String | Symbol | Int32 | Nil
 
   def initialize(@parent, @value, @path)
-  end
-
-  def full_path : Array(String | Int32)
+    @full_path = @parent.full_path.clone
     temp = path
-    if temp.is_a?(Symbol)
-      temp = temp.to_s
+    temp = temp.to_s if temp.is_a?(Symbol)
+    if temp.is_a?(String | Int32)
+      @full_path << temp
     end
-    parent.full_path << temp
   end
 end

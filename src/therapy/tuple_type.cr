@@ -11,7 +11,6 @@ class Therapy::TupleType(VALIDATORS, OUT) < Therapy::BaseType(OUT)
       val = value[idx]
       subcontext = validator.create_subcontext(context, val, path: idx)
       validator.apply_checks(subcontext)
-      subcontext.errors.each(&.path.push(idx))
       context.errors.concat(subcontext.errors)
     end
   end

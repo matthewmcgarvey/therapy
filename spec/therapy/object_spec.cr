@@ -57,4 +57,14 @@ describe Therapy::ObjectType do
       validation.parse!(params).should eq({colors: {"red", "blue"}})
     end
   end
+
+  it "does not mess up validations if more than one attribute is invalid" do
+    validation = Therapy.object(
+      first_name: Therapy.string.min(3),
+      last_name: Therapy.string.min(3)
+    )
+
+    validation.parse({first_name: "a", last_name: "b"})
+      .should be_error(%{["first_name"]: Must have minimum size of 3, ["last_name"]: Must have minimum size of 3})
+  end
 end

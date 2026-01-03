@@ -15,7 +15,6 @@ class Therapy::ObjectType(VALIDATORS, OUT) < Therapy::BaseType(OUT)
       val = value[key]
       subcontext = validator.create_subcontext(context, val, path: key)
       validator.apply_checks(subcontext)
-      subcontext.errors.each(&.path.push(key.to_s))
       context.errors.concat(subcontext.errors)
     end
   end

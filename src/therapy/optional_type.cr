@@ -34,7 +34,7 @@ class Therapy::OptionalType(T) < Therapy::BaseType(T?)
     # checks.each(&.check(context))
     value = context.value
     if value
-      subcontext = inner.create_subcontext(context, value, path: 0)
+      subcontext = inner.create_subcontext(context, value, path: nil)
       inner.apply_checks(subcontext)
       context.errors.concat(subcontext.errors)
     end
