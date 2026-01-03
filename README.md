@@ -39,12 +39,9 @@ TODO: Write development instructions here
 
 ## TODO
 
+- Errors on a subcontext should have the correct path
+  - Path on subcontext needs to be optional so that the OptionalType isn't affected
 - Support enums
-- Cascade coercion so that you don't have to specify it on every attribute
-  - This could be a bad idea
-  - I want to be able to coerce json, not necessarily coerce ints to string
-  - What I _really_ want is for json parsing to turn fields into the string value when the parent is coercing
-  - this is probably why I originally had object pulling the raw value from JSON::Any when passing to coerce instead of passing the json
 - Allow specifying the path on the object validation
   - When checking password confirmation, the path of the error should point towards it
 
