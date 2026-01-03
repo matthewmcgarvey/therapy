@@ -44,4 +44,9 @@ module Therapy
     }).new(options)
   {% end %}
   end
+
+  def self.enum(enum_type : T.class) : EnumType(T) forall T
+    {% raise "enum_type must be an Enum type but got #{T}" unless T < ::Enum %}
+    EnumType(T).new
+  end
 end

@@ -1,4 +1,5 @@
 require "../spec_helper"
+require "../support/enums"
 
 describe Therapy::ObjectType do
   it "is invalid if attribute is invalid" do
@@ -88,5 +89,14 @@ describe Therapy::ObjectType do
       validation.parse({"pw" => "abc123", "pw_confirmation" => "def456"})
         .should be_error("Confirmation must match pw")
     end
+  end
+
+  it "works with enums" do
+    validation = Therapy.object(
+      name: Therapy.string,
+      role: Therapy.enum(Role)
+    )
+
+    validation.parse!({"name" => "hackerman", "role" => "admin"}).should eq({name: "hackerman", role: Role::Admin})
   end
 end

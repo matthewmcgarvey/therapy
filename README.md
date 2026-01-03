@@ -39,9 +39,6 @@ TODO: Write development instructions here
 
 ## TODO
 
-- Errors on a subcontext should have the correct path
-  - Path on subcontext needs to be optional so that the OptionalType isn't affected
-- Support enums
 - Allow specifying the path on the object validation
   - When checking password confirmation, the path of the error should point towards it
 
