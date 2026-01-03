@@ -4,57 +4,44 @@ class Therapy::ArrayType(T) < Therapy::BaseType(Array(T))
   def initialize(@validator)
   end
 
-  protected def _parse(context : ParseContext(Array(T), Array(T))) : Result(Array(T))
-    results = context.value.map_with_index do |value, idx|
-      sub_context = validator.create_subcontext(context, value, path: idx)
-      validator._parse(sub_context)
-      sub_context.to_result
-    end
-
+  protected def apply_checks(context : ParseContext(Array(T), Array(T))) : Nil
     checks.each(&.check(context))
-
-    if results.all?(&.success?)
-      Result::Success.new(context.value)
-    else
-      item_errors = results.flat_map(&.errors)
-      arr_errors = context.errors
-      Result::Failure(Array(T)).new(item_errors + arr_errors)
+    value = context.value
+    value.each_with_index do |val, idx|
+      subcontext = validator.create_subcontext(context, val, path: idx)
+      validator.apply_checks(subcontext)
+      subcontext.errors.each(&.path.push(idx))
+      context.errors.concat(subcontext.errors)
     end
   end
 
-  protected def _do_coerce(context : ParseContext(Array(T), Array))
-    context.map_result do |arr|
-      results = arr.map_with_index do |value, idx|
-        sub_context = validator.create_subcontext(context, value, path: idx)
-        validator.coerce(sub_context).to_result
-      end
+  protected def _coerce(value : JSON::Any) : Result(Array(T))
+    arr = value.as_a?
+    return Result::Failure(Array(T)).with_msg("Expected JSON to be an Array but it was a #{value.raw.class}") if arr.nil?
 
-      if results.all?(&.success?)
-        Result::Success.new(results.map(&.value.as(T)))
-      else
-        item_errors = results.flat_map(&.errors)
-        Result::Failure(Array(T)).new(item_errors)
-      end
+    results = arr.map_with_index do |val, idx|
+      {idx, validator._coerce(val)}
     end
+
+    handle_coerce_results(results)
   end
 
-  protected def _do_coerce(context : ParseContext(Array(T), JSON::Any))
-    context.map_result do |val|
-      if arr = val.as_a?
-        results = arr.map_with_index do |value, idx|
-          sub_context = validator.create_subcontext(context, value, path: idx)
-          validator.coerce(sub_context).to_result
-        end
-
-        if results.all?(&.success?)
-          Result::Success.new(results.map(&.value.as(T)))
-        else
-          item_errors = results.flat_map(&.errors)
-          Result::Failure(Array(T)).new(item_errors)
-        end
-      else
-        Result::Failure(Array(T)).with_msg("Expected #{Array(T)} got #{val.raw.class}")
-      end
+  protected def _coerce(value : Array) : Result(Array(T))
+    results = value.map_with_index do |val, idx|
+      {idx, validator._coerce(val)}
     end
+
+    handle_coerce_results(results)
+  end
+
+  private def handle_coerce_results(results : Array(Tuple(Int32, Result(T)))) : Result(Array(T))
+    # TODO: errors should probably have the path set to the idx value
+    if results.any? { |res| res[1].failure? }
+      errors = results.flat_map { |res| res[1].errors }
+      return Result::Failure(Array(T)).new(errors)
+    end
+
+    result_arr = results.map { |res| res[1].value.as(T) }
+    Result::Success(Array(T)).new(result_arr)
   end
 end

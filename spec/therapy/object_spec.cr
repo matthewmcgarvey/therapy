@@ -25,7 +25,29 @@ describe Therapy::ObjectType do
       }
     JSON
     validation = Therapy.object(id: Therapy.int32, roles: Therapy.array(Therapy.string).optional)
-    # validation.parse!(json_attr_missing).should eq({id: 123, roles: nil})
+    validation.parse!(json_attr_missing).should eq({id: 123, roles: nil})
     validation.parse!(json_attr_null).should eq({id: 123, roles: nil})
+  end
+
+  it "handles coercing bool attribute from string" do
+    validation = Therapy.object(key: Therapy.bool)
+
+    validation.parse!({key: "true"}).should eq({key: true})
+  end
+
+  context "URI::Params" do
+    it "single value" do
+      params = URI::Params.new({"admin" => ["true"]})
+      validation = Therapy.object(admin: Therapy.bool)
+
+      validation.parse!(params).should eq({admin: true})
+    end
+
+    it "array value" do
+      params = URI::Params.new({"colors" => ["red", "blue"]})
+      validation = Therapy.object(colors: Therapy.array(Therapy.string))
+
+      validation.parse!(params).should eq({colors: ["red", "blue"]})
+    end
   end
 end

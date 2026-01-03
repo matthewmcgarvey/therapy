@@ -1,3 +1,4 @@
+# TODO: Switch to using _coerce like ObjectType
 class Therapy::TupleType(VALIDATORS, OUT) < Therapy::BaseType(OUT)
   private getter validators : VALIDATORS
 

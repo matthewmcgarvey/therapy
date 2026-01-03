@@ -1,5 +1,5 @@
 abstract class Therapy::BaseType(T)
-  private getter checks = [] of Check(T)
+  protected getter checks = [] of Check(T)
 
   def optional : OptionalType(T)
     OptionalType.new(self)
@@ -10,40 +10,25 @@ abstract class Therapy::BaseType(T)
   end
 
   def parse(input : V) : Result(T) forall V
-    context = coerce(ParseContext(T, V).new(input))
-    _parse(context)
-    context.to_result
+    _parse(ParseContext(T, V).new(input))
   end
 
   def create_subcontext(parent : ParseContext, input : V, path) : ParseContext(T, V) forall V
     SubContext(T, V, typeof(parent)).new(parent, input, path).as(ParseContext(T, V))
   end
 
-  protected def _parse(context : ParseContext(T, T)) : Nil
+  protected def _parse(context : ParseContext(T, V)) : Result(T) forall V
+    context = coerce(context)
+    apply_checks(context)
+    context.to_result
+  end
+
+  protected def apply_checks(context : ParseContext(T, T)) : Nil
     checks.each(&.check(context))
   end
 
-  protected def _parse(context) : Nil forall V
-    # do nothing
-  end
-
-  protected def coerce(context : ParseContext(T, T)) : ParseContext(T, T)
-    context
-  end
-
-  protected def coerce(context : ParseContext(T, V?)) : ParseContext(T, V?) | ParseContext(T, V) | ParseContext(T, T) forall V
-    new_context = context.map_result do |val|
-      if val.nil?
-        Result::Failure(V).with_msg("Expected #{T} got #{val.class}")
-      else
-        Result::Success(V).new(val.not_nil!)
-      end
-    end
-    if new_context.is_a?(ParseContext(T, V)) && !new_context.errors.present?
-      _do_coerce(new_context)
-    else
-      new_context
-    end
+  protected def apply_checks(context) : Nil
+    # do nothing, coercing failed
   end
 
   protected def coerce(context : ParseContext(T, V)) : ParseContext(T, V) | ParseContext(T, T) forall V

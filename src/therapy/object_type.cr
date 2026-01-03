@@ -8,90 +8,65 @@ class Therapy::ObjectType(VALIDATORS, OUT) < Therapy::BaseType(OUT)
     add_validation(validation, err_msg)
   end
 
-  def _parse(input : ParseContext(OUT, OUT)) : Result(OUT)
-    with_parse_handling(input) do |key, validator|
-      value = input.value[key]
-      sub_parse_context = validator.create_subcontext(input, value, path: key)
-      validator._parse(sub_parse_context)
-      {key, sub_parse_context.to_result}
-    end
-  end
-
-  def _do_coerce(context : ParseContext(OUT, NamedTuple))
-    context.map_result do |value|
-      handle_coercion(context) do |key|
-        value[key]?
-      end
-    end
-  end
-
-  def _do_coerce(context : ParseContext(OUT, JSON::Any))
-    context.map_result do |value|
-      handle_coercion(context) do |key|
-        value[key.to_s]?
-      end
-    end
-  end
-
-  def _do_coerce(context : ParseContext(OUT, URI::Params))
-    context.map_result do |value|
-      handle_coercion(context) do |key|
-        value[key.to_s]?
-      end
-    end
-  end
-
-  def _do_coerce(context : ParseContext(OUT, Hash))
-    context.map_result do |value|
-      handle_coercion(context) do |key|
-        value[key]? || value[key.to_s]?
-      end
-    end
-  end
-
-  private def handle_coercion(context, &)
-    with_handling do |key, validator|
-      value = yield key
-      sub_context = validator.create_subcontext(context, value, path: key)
-      sub_context = validator.coerce(sub_context)
-      validator._parse(sub_context)
-      {key, sub_context.to_result}
-    end
-  end
-
-  private def with_parse_handling(context, &)
-    results = validators.map do |key, validator|
-      yield key, validator
-    end
-
+  protected def apply_checks(context : ParseContext(OUT, OUT)) : Nil
     checks.each(&.check(context))
-
-    if results.all? { |res| res[1].success? } && context.errors.none?
-      hash = results.map { |res| {res[0], res[1].value} }.to_h
-      Result::Success(OUT).new(OUT.from(hash))
-    else
-      field_errors = results.flat_map { |res| res[1].errors }
-      object_errors = context.errors
-      Result::Failure(OUT).new(field_errors + object_errors)
+    value = context.value
+    validators.each do |key, validator|
+      val = value[key]
+      subcontext = validator.create_subcontext(context, val, path: key)
+      validator.apply_checks(subcontext)
+      subcontext.errors.each(&.path.push(key.to_s))
+      context.errors.concat(subcontext.errors)
     end
   end
 
-  private def with_handling(&)
+  protected def _coerce(value : JSON::Any) : Result(OUT)
+    hash = value.as_h?
+    return Result::Failure(OUT).with_msg("Expected JSON to be a Hash but it was a #{value.raw.class}") if hash.nil?
+
+    coercing_each do |key, validator|
+      val = hash[key.to_s]?
+      {key, validator._coerce(val)}
+    end
+  end
+
+  protected def _coerce(value : URI::Params) : Result(OUT)
+    coercing_each do |key, validator|
+      val = if validator.is_a?(ArrayType)
+              value.fetch_all(key.to_s)
+            else
+              value[key.to_s]?
+            end
+      {key, validator._coerce(val)}
+    end
+  end
+
+  protected def _coerce(value : Hash(String, V)) : Result(OUT) forall V
+    coercing_each do |key, validator|
+      val = value[key.to_s]?
+      {key, validator._coerce(val)}
+    end
+  end
+
+  protected def _coerce(value : NamedTuple) : Result(OUT)
+    coercing_each do |key, validator|
+      val = value[key]?
+      {key, validator._coerce(val)}
+    end
+  end
+
+  private def coercing_each(&) : Result(OUT)
     results = validators.map do |key, validator|
       yield key, validator
     end
 
-    if results.all? { |res| res[1].success? }
-      hash = results.map { |res| {res[0], res[1].value} }.to_h
-      Result::Success(OUT).new(OUT.from(hash))
-    else
-      errors = [] of Therapy::Error
-      results.each do |res|
-        attr_errors = res[1].errors
-        attr_errors.each { |err| err.path << res[0].to_s }
-        errors += attr_errors
-      end
-      Result::Failure(OUT).new(errors)
+    # TODO: errors should probably have the path set on them
+    if results.any? { |res| res[1].failure? }
+      errors = results.flat_map { |res| res[1].errors }
+      return Result::Failure(OUT).new(errors)
     end
+
+    hash = results.map { |res| {res[0], res[1].value} }.to_h
+    Result::Success(OUT).new(OUT.from(hash))
   end
 end
