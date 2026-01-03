@@ -5,6 +5,8 @@ require "./therapy/base_type"
 require "./therapy/*"
 
 module Therapy
+  alias PathType = Symbol | String | Int32 | Nil
+
   def self.string : StringType
     StringType.new
   end

@@ -67,4 +67,20 @@ describe Therapy::ObjectType do
     validation.parse({first_name: "a", last_name: "b"})
       .should be_error(%{["first_name"]: Must have minimum size of 3, ["last_name"]: Must have minimum size of 3})
   end
+
+  describe "#validate" do
+    it "works" do
+      validation = Therapy.object(
+        pw: Therapy.string,
+        pw_confirmation: Therapy.string
+      ).validate("Confirmation must match pw") do |val|
+        val[:pw] == val[:pw_confirmation]
+      end
+
+      validation.parse!({"pw" => "abc123", "pw_confirmation" => "abc123"})
+        .should eq({pw: "abc123", pw_confirmation: "abc123"})
+      validation.parse({"pw" => "abc123", "pw_confirmation" => "def456"})
+        .should be_error("Confirmation must match pw")
+    end
+  end
 end
