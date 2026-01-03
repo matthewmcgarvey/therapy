@@ -7,13 +7,13 @@ describe Therapy do
     a.parse!(nil).should eq(nil)
     expect_raises(Exception) { a.parse!(5) }
 
-    b = Therapy.int32
+    b = Therapy.int
     b.parse!(5).should eq(5)
     expect_raises(Exception) { b.parse!("5") }
     expect_raises(Exception) { b.parse!(true) }
     expect_raises(Exception) { b.parse!(nil) }
 
-    b2 = Therapy.int32.min(2).max(9)
+    b2 = Therapy.int.min(2).max(9)
     b2.parse!(2).should eq(2)
     b2.parse!(9).should eq(9)
     expect_raises(Exception) { b2.parse!(1) }
@@ -93,15 +93,15 @@ describe Therapy do
     expect_raises(Exception) { l.parse!("not an array") }
     expect_raises(Exception) { l.parse!([1, 2]) }
 
-    l1 = Therapy.array(Therapy.int32)
+    l1 = Therapy.array(Therapy.int)
     expect_raises(Exception) { l1.parse!(["1"]) }
     l1.parse!(JSON.parse([1].to_json)).should eq([1])
 
     # m
-    m = Therapy.tuple(Therapy.string, Therapy.int32)
+    m = Therapy.tuple(Therapy.string, Therapy.int)
     m.parse!(["hello", 42]).should eq({"hello", 42})
 
-    m1 = Therapy.tuple(Therapy.string, Therapy.int32)
+    m1 = Therapy.tuple(Therapy.string, Therapy.int)
     m1.parse!(JSON.parse(["hello", 42].to_json)).should eq({"hello", 42})
 
     # n

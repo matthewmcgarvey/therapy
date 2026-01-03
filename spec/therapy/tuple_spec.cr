@@ -2,7 +2,7 @@ require "../spec_helper"
 
 describe Therapy::TupleType do
   it "handles an array" do
-    validation = Therapy.tuple(Therapy.string, Therapy.int32)
+    validation = Therapy.tuple(Therapy.string, Therapy.int)
 
     validation.parse!(["hello", 42]).should eq({"hello", 42})
   end
@@ -21,7 +21,7 @@ describe Therapy::TupleType do
   end
 
   it "has appropriate error when array size doesn't match" do
-    validation = Therapy.tuple(Therapy.int32, Therapy.int32)
+    validation = Therapy.tuple(Therapy.int, Therapy.int)
 
     validation.parse([1, 2, 3]).should be_error("Must have size of 2 but was 3")
     validation.parse([1]).should be_error("Must have size of 2 but was 1")

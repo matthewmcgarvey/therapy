@@ -11,8 +11,12 @@ module Therapy
     StringType.new
   end
 
-  def self.int32 : Int32Type
-    Int32Type.new
+  def self.int(int_type : T.class) : IntType(T) forall T
+    IntType(T).new
+  end
+
+  def self.int : IntType(Int32)
+    IntType(Int32).new
   end
 
   def self.bool : BoolType

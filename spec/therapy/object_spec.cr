@@ -25,7 +25,7 @@ describe Therapy::ObjectType do
         "roles": null
       }
     JSON
-    validation = Therapy.object(id: Therapy.int32, roles: Therapy.array(Therapy.string).optional)
+    validation = Therapy.object(id: Therapy.int, roles: Therapy.array(Therapy.string).optional)
     validation.parse!(json_attr_missing).should eq({id: 123, roles: nil})
     validation.parse!(json_attr_null).should eq({id: 123, roles: nil})
   end
