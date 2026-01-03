@@ -12,11 +12,21 @@ module Therapy
   end
 
   def self.int(int_type : T.class) : IntType(T) forall T
+    {% raise "int_type must be an Int type but got #{T}" unless T < ::Int %}
     IntType(T).new
   end
 
   def self.int : IntType(Int32)
     IntType(Int32).new
+  end
+
+  def self.float(float_type : T.class) : FloatType(T) forall T
+    {% raise "float_type must be a Float type but got #{T}" unless T < ::Float %}
+    FloatType(T).new
+  end
+
+  def self.float : FloatType(Float64)
+    FloatType(Float64).new
   end
 
   def self.bool : BoolType
