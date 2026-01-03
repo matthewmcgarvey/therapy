@@ -16,6 +16,9 @@ class Therapy::TupleType(VALIDATORS, OUT) < Therapy::BaseType(OUT)
   end
 
   protected def _coerce(value : Array) : Result(OUT)
+    if value.size != validators.size
+      return Result::Failure(OUT).with_msg("Must have size of #{validators.size} but was #{value.size}")
+    end
     coercing_each do |key, validator|
       val = value[key]?
       {key, validator._coerce(val)}
@@ -26,10 +29,7 @@ class Therapy::TupleType(VALIDATORS, OUT) < Therapy::BaseType(OUT)
     arr = value.as_a?
     return Result::Failure(OUT).with_msg("Expected JSON to be an Array but it was a #{value.raw.class}") if arr.nil?
 
-    coercing_each do |key, validator|
-      val = arr[key]?
-      {key, validator._coerce(val)}
-    end
+    _coerce(arr)
   end
 
   private def coercing_each(&) : Result(OUT)
