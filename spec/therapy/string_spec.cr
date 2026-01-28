@@ -3,7 +3,7 @@ require "../spec_helper"
 describe Therapy::StringType do
   it "can't be nil by default" do
     validation = Therapy.string
-    # validation.parse!("im a string").should eq("im a string")
+    validation.parse!("im a string").should eq("im a string")
     validation.parse(nil).should be_error("Expected String got Nil")
   end
 
@@ -53,5 +53,12 @@ describe Therapy::StringType do
 
     json1 = JSON::Any.new(123)
     validation.parse(json1).should be_error("Expected String got Int64")
+  end
+
+  describe "#strip" do
+    it "removes leading and trailing whitespace" do
+      validation = Therapy.string.strip
+      validation.parse!("   hello   ").should eq("hello")
+    end
   end
 end
