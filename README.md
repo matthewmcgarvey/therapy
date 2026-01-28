@@ -39,6 +39,13 @@ TODO: Write development instructions here
 
 ## TODO
 
+- Unions
+  - String OR Int
+  - Array of Bools AND Strings
+  - Two Different Object Structures
+- Hashes (for when keys are unknown/dynamic)
+- more validations/transformations
+
 ## Contributing
 
 1. Fork it (<https://github.com/matthewmcgarvey/therapy/fork>)
