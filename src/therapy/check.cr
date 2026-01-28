@@ -1,8 +1,8 @@
 class Therapy::Check(T)
-  def self.valid(error_msg : String, &block : T -> Bool) : Check(T) forall T
+  def self.valid(error_msg : String, path : Array(String | Int32)? = nil, &block : T -> Bool) : Check(T) forall T
     check = ->(input : Therapy::ParseContext(T, T)) do
       if !block.call(input.value)
-        input.add_error(error_msg)
+        input.add_error(error_msg, path)
       end
     end
     Check(T).new(check)

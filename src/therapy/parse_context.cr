@@ -7,8 +7,8 @@ class Therapy::ParseContext(T, V)
     @full_path = [] of String | Int32
   end
 
-  def add_error(msg : String)
-    errors << Therapy::Error.new(msg, path: full_path)
+  def add_error(msg : String, path : Array(String | Int32)? = nil)
+    errors << Therapy::Error.new(msg, path: path || full_path)
   end
 
   def map(&block : V -> X) : ParseContext(T, X) forall X

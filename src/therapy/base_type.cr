@@ -53,8 +53,8 @@ abstract class Therapy::BaseType(T)
     self
   end
 
-  private def add_validation(validation : T -> Bool, err_msg : String) : self
-    checks << Check(T).valid(err_msg, &validation)
+  private def add_validation(validation : T -> Bool, err_msg : String, path : Array(String | Int32)? = nil) : self
+    checks << Check(T).valid(err_msg, path, &validation)
     self
   end
 end

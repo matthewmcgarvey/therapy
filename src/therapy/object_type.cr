@@ -4,8 +4,8 @@ class Therapy::ObjectType(VALIDATORS, OUT) < Therapy::BaseType(OUT)
   def initialize(@validators)
   end
 
-  def validate(err_msg : String, &validation : OUT -> Bool) : self
-    add_validation(validation, err_msg)
+  def validate(err_msg : String, path : Array(String | Int32)? = nil, &validation : OUT -> Bool) : self
+    add_validation(validation, err_msg, path.try(&.map(&.as(String | Int32))))
   end
 
   protected def apply_checks(context : ParseContext(OUT, OUT)) : Nil

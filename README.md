@@ -23,7 +23,7 @@ sign_up_form = Therapy.object(
   email: Therapy.string,
   password: Therapy.string,
   confirm: Therapy.string
-).validate("Confirm must match password") do |form|
+).validate("Confirm must match password", path: ["password"]) do |form|
   form[:password] == form[:confirm]
 end
 
@@ -38,9 +38,6 @@ TODO: Write usage instructions here
 TODO: Write development instructions here
 
 ## TODO
-
-- Allow specifying the path on the object validation
-  - When checking password confirmation, the path of the error should point towards it
 
 ## Contributing
 

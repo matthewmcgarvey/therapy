@@ -76,18 +76,30 @@ describe Therapy::ObjectType do
   end
 
   describe "#validate" do
-    it "works" do
+    it "works with string in path" do
       validation = Therapy.object(
-        pw: Therapy.string,
-        pw_confirmation: Therapy.string
-      ).validate("Confirmation must match pw") do |val|
-        val[:pw] == val[:pw_confirmation]
+        password: Therapy.string,
+        confirmation: Therapy.string
+      ).validate("Confirmation must match password", path: ["password"]) do |val|
+        val[:password] == val[:confirmation]
       end
 
-      validation.parse!({"pw" => "abc123", "pw_confirmation" => "abc123"})
-        .should eq({pw: "abc123", pw_confirmation: "abc123"})
-      validation.parse({"pw" => "abc123", "pw_confirmation" => "def456"})
-        .should be_error("Confirmation must match pw")
+      validation.parse!({"password" => "abc123", "confirmation" => "abc123"})
+        .should eq({password: "abc123", confirmation: "abc123"})
+      validation.parse({"password" => "abc123", "confirmation" => "wrong"})
+        .should be_error(%(["password"]: Confirmation must match password))
+    end
+
+    it "works with string and numbers in path" do
+      validation = Therapy.object(
+        names: Therapy.array(Therapy.string)
+      ).validate("Second name was Larry", path: ["names", 1]) do |val|
+        val[:names][1]? != "Larry"
+      end
+
+      validation.parse!({"names" => ["Bob", "Sally"]}).should eq({names: ["Bob", "Sally"]})
+      validation.parse({"names" => ["Bob", "Larry"]})
+        .should be_error(%(["names", 1]: Second name was Larry))
     end
   end
 
