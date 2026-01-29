@@ -11,11 +11,6 @@ class Therapy::ParseContext(T, V)
     errors << Therapy::Error.new(msg, path: path || full_path)
   end
 
-  def map(&block : V -> X) : ParseContext(T, X) forall X
-    new_value = yield value
-    ParseContext(T, X).new(new_value)
-  end
-
   def map_result(&block : V -> Result(X)) : ParseContext(T, V) | ParseContext(T, X) forall X
     result = yield value
     if result.failure?
