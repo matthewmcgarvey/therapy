@@ -31,7 +31,7 @@ json = JSON.parse(request.body)
 sign_up = sign_up_form.parse!(json) #=> NamedTuple(email: String, password: String, confirm: String)
 ```
 
-TODO: Write usage instructions here
+See [DOCS.md](DOCS.md) for full type reference, coercions, and validations.
 
 ## Development
 
