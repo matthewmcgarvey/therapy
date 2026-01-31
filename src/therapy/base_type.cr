@@ -5,6 +5,10 @@ abstract class Therapy::BaseType(T)
     OptionalType.new(self)
   end
 
+  def or(other : BaseType(U)) : UnionType(T, U) forall U
+    UnionType(T, U).new(self, other)
+  end
+
   def parse!(input) : T
     parse(input).value
   end
