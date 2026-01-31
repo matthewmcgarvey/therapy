@@ -13,59 +13,58 @@ class Therapy::ObjectType(VALIDATORS, OUT) < Therapy::BaseType(OUT)
     value = context.value
     validators.each do |key, validator|
       val = value[key]
-      subcontext = validator.new_context(val, path: key.to_s)
-      validator.apply_checks(subcontext)
-      context.errors.concat(subcontext.errors)
+      new_path = context.full_path.dup
+      new_path << key.to_s
+      validator.apply_checks_on_coerced(val, new_path)
+        .tap { |errs| context.errors.concat(errs) }
     end
   end
 
-  protected def _coerce(value : JSON::Any) : Result(OUT)
+  def coerce(value : V, path : Array(String | Int32) = [] of String | Int32) : Result(OUT) forall V
+    coerce_value(value, path)
+  end
+
+  private def coerce_value(value : JSON::Any, path) : Result(OUT)
     hash = value.as_h?
-    return Result::Failure(OUT).with_msg("Expected JSON to be a Hash but it was a #{value.raw.class}") if hash.nil?
+    return Result::Failure(OUT).with_msg("Expected JSON to be a Hash but it was a #{value.raw.class}", path) if hash.nil?
+    coerce_fields(path) { |key| hash[key.to_s]? }
+  end
 
-    coercing_each do |key, validator|
-      val = hash[key.to_s]?
-      {key, validator._coerce(val)}
+  private def coerce_value(value : URI::Params, path) : Result(OUT)
+    coerce_fields(path) do |key, validator|
+      if validator.is_a?(ArrayType) || validator.is_a?(TupleType)
+        value.fetch_all(key.to_s)
+      else
+        value[key.to_s]?
+      end
     end
   end
 
-  protected def _coerce(value : URI::Params) : Result(OUT)
-    coercing_each do |key, validator|
-      val = if validator.is_a?(ArrayType) || validator.is_a?(TupleType)
-              value.fetch_all(key.to_s)
-            else
-              value[key.to_s]?
-            end
-      {key, validator._coerce(val)}
-    end
+  private def coerce_value(value : Hash, path) : Result(OUT)
+    coerce_fields(path) { |key| value[key.to_s]? }
   end
 
-  protected def _coerce(value : Hash(String, V)) : Result(OUT) forall V
-    coercing_each do |key, validator|
-      val = value[key.to_s]?
-      {key, validator._coerce(val)}
-    end
+  private def coerce_value(value : NamedTuple, path) : Result(OUT)
+    coerce_fields(path) { |key| value[key]? }
   end
 
-  protected def _coerce(value : NamedTuple) : Result(OUT)
-    coercing_each do |key, validator|
-      val = value[key]?
-      {key, validator._coerce(val)}
-    end
+  private def coerce_value(value, path) : Result(OUT)
+    Result::Failure(OUT).with_msg("Expected Hash-like input but go #{value.class}", path)
   end
 
-  private def coercing_each(&) : Result(OUT)
+  private def coerce_fields(path, &get_value) : Result(OUT)
+    all_errors = [] of Error
     results = validators.map do |key, validator|
-      yield key, validator
+      val = yield key, validator
+      field_path = path + [key.to_s.as(String | Int32)]
+      result = validator.coerce(val, field_path)
+      all_errors.concat(result.errors) if result.failure?
+      {key, result}
     end
 
-    # TODO: errors should probably have the path set on them
-    if results.any? { |res| res[1].failure? }
-      errors = results.flat_map { |res| res[1].errors }
-      return Result::Failure(OUT).new(errors)
-    end
+    return Result::Failure(OUT).new(all_errors) if all_errors.any?
 
-    hash = results.map { |res| {res[0], res[1].value} }.to_h
+    hash = results.map { |key, res| {key, res.value} }.to_h
     Result::Success(OUT).new(OUT.from(hash))
   end
 end

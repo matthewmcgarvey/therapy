@@ -9,40 +9,48 @@ class Therapy::TupleType(VALIDATORS, OUT) < Therapy::BaseType(OUT)
     value = context.value
     validators.map_with_index do |validator, idx|
       val = value[idx]
-      subcontext = validator.new_context(val, path: idx)
-      validator.apply_checks(subcontext)
-      context.errors.concat(subcontext.errors)
+      new_path = context.full_path.dup
+      new_path << idx
+      validator.apply_checks_on_coerced(val, new_path)
+        .tap { |errs| context.errors.concat(errs) }
     end
   end
 
-  protected def _coerce(value : Array) : Result(OUT)
-    if value.size != validators.size
-      return Result::Failure(OUT).with_msg("Must have size of #{validators.size} but was #{value.size}")
-    end
-    coercing_each do |key, validator|
-      val = value[key]?
-      {key, validator._coerce(val)}
-    end
+  def coerce(value : V, path : Array(String | Int32) = [] of String | Int32) : Result(OUT) forall V
+    coerce_value(value, path)
   end
 
-  protected def _coerce(value : JSON::Any) : Result(OUT)
+  private def coerce_value(value : JSON::Any, path) : Result(OUT)
     arr = value.as_a?
-    return Result::Failure(OUT).with_msg("Expected JSON to be an Array but it was a #{value.raw.class}") if arr.nil?
-
-    _coerce(arr)
+    return Result::Failure(OUT).with_msg("Expected JSON to be an Array but it was a #{value.raw.class}", path) if arr.nil?
+    coerce_elements(arr, path)
   end
 
-  private def coercing_each(&) : Result(OUT)
+  private def coerce_value(value : Array, path) : Result(OUT)
+    coerce_elements(value, path)
+  end
+
+  private def coerce_value(value, path) : Result(OUT)
+    Result::Failure(OUT).with_msg("Expected Array but got #{value.class}", path)
+  end
+
+  private def coerce_elements(arr, path) : Result(OUT)
+    if arr.size != validators.size
+      return Result::Failure(OUT).with_msg("Must have size of #{validators.size} but was #{arr.size}", path)
+    end
+
+    all_errors = [] of Error
     results = validators.map_with_index do |validator, idx|
-      yield idx, validator
+      val = arr[idx]?
+      elem_path = path + [idx.as(String | Int32)]
+      result = validator.coerce(val, elem_path)
+      all_errors.concat(result.errors) if result.failure?
+      result
     end
 
-    if results.any? { |res| res[1].failure? }
-      errors = results.flat_map { |res| res[1].errors }
-      return Result::Failure(OUT).new(errors)
-    end
+    return Result::Failure(OUT).new(all_errors) if all_errors.any?
 
-    arr = results.map { |res| res[1].value }.to_a
-    Result::Success(OUT).new(OUT.from(arr))
+    result_arr = results.map(&.value).to_a
+    Result::Success(OUT).new(OUT.from(result_arr))
   end
 end

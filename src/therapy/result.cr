@@ -37,8 +37,8 @@ abstract struct Therapy::Result(T)
   end
 
   struct Failure(T) < Result(T)
-    def self.with_msg(err_msg : String) : Failure(T)
-      new([Therapy::Error.new(err_msg)])
+    def self.with_msg(err_msg : String, path : Array(String | Int32) = [] of String | Int32) : Failure(T)
+      new([Therapy::Error.new(err_msg, path)])
     end
 
     getter errors : Array(Therapy::Error)

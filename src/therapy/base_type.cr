@@ -10,19 +10,7 @@ abstract class Therapy::BaseType(T)
   end
 
   def parse(input : V) : Result(T) forall V
-    _parse(ParseContext(T, V).new(input))
-  end
-
-  protected def new_context(input : V, path : PathType?) : ParseContext(T, T) forall V
-    context = ParseContext(T, T).new(input.as(T))
-    context.full_path << path if path
-    context
-  end
-
-  protected def _parse(context : ParseContext(T, V)) : Result(T) forall V
-    context = coerce(context)
-    apply_checks(context)
-    context.to_result
+    ParseContext(T, V).new(input, self).parse
   end
 
   protected def apply_checks(context : ParseContext(T, T)) : Nil
@@ -33,13 +21,24 @@ abstract class Therapy::BaseType(T)
     # do nothing, coercing failed
   end
 
-  protected def coerce(context : ParseContext(T, V)) : ParseContext(T, V) | ParseContext(T, T) forall V
-    context.map_result { |value| _coerce(value) }
+  # Runs apply_checks on an already-coerced value, returning any errors
+  def apply_checks_on_coerced(value, path : Array(String | Int32) = [] of String | Int32) : Array(Error)
+    context = ParseContext(T, T).new(value.as(T), self, path)
+    apply_checks(context)
+    context.errors
   end
 
-  protected def coerce(context : ParseContext)
-    context.add_error("Something went wrong")
-    context
+  def coerce(value : V, path : Array(String | Int32) = [] of String | Int32) : Result(T) forall V
+    result = _coerce(value)
+    if result.failure? && result.errors.any?(&.path.empty?)
+      # Add path to errors that don't have one
+      errors = result.errors.map do |err|
+        err.path.empty? ? Error.new(err.message, path) : err
+      end
+      Result::Failure(T).new(errors)
+    else
+      result
+    end
   end
 
   protected def _coerce(value : T) : Result(T)

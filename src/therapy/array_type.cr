@@ -8,39 +8,49 @@ class Therapy::ArrayType(T) < Therapy::BaseType(Array(T))
     checks.each(&.check(context))
     value = context.value
     value.each_with_index do |val, idx|
-      subcontext = validator.new_context(val, path: idx)
-      validator.apply_checks(subcontext)
-      context.errors.concat(subcontext.errors)
+      new_path = context.full_path.dup
+      new_path << idx
+      validator.apply_checks_on_coerced(val, new_path)
+        .tap { |errs| context.errors.concat(errs) }
     end
   end
 
-  protected def _coerce(value : JSON::Any) : Result(Array(T))
+  def coerce(value : V, path : Array(String | Int32) = [] of String | Int32) : Result(Array(T)) forall V
+    coerce_value(value, path)
+  end
+
+  private def coerce_value(value : JSON::Any, path) : Result(Array(T))
     arr = value.as_a?
-    return Result::Failure(Array(T)).with_msg("Expected JSON to be an Array but it was a #{value.raw.class}") if arr.nil?
-
-    results = arr.map_with_index do |val, idx|
-      {idx, validator._coerce(val)}
-    end
-
-    handle_coerce_results(results)
+    return Result::Failure(Array(T)).with_msg("Expected JSON to be an Array but it was a #{value.raw.class}", path) if arr.nil?
+    coerce_elements(arr, path)
   end
 
-  protected def _coerce(value : Array) : Result(Array(T))
-    results = value.map_with_index do |val, idx|
-      {idx, validator._coerce(val)}
-    end
-
-    handle_coerce_results(results)
+  private def coerce_value(value : Array, path) : Result(Array(T))
+    coerce_elements(value, path)
   end
 
-  private def handle_coerce_results(results : Array(Tuple(Int32, Result(T)))) : Result(Array(T))
-    # TODO: errors should probably have the path set to the idx value
-    if results.any? { |res| res[1].failure? }
-      errors = results.flat_map { |res| res[1].errors }
-      return Result::Failure(Array(T)).new(errors)
+  private def coerce_value(value, path) : Result(Array(T))
+    Result::Failure(Array(T)).with_msg("Expected Array but got #{value.class}", path)
+  end
+
+  private def coerce_elements(arr, path) : Result(Array(T))
+    all_errors = [] of Error
+    values = [] of T
+
+    arr.each_with_index do |val, idx|
+      elem_path = path + [idx.as(String | Int32)]
+      result = validator.coerce(val, elem_path)
+      if result.failure?
+        all_errors.concat(result.errors)
+      else
+        values << result.value
+      end
     end
 
-    result_arr = results.map { |res| res[1].value.as(T) }
-    Result::Success(Array(T)).new(result_arr)
+    if all_errors.any?
+      Result::Failure(Array(T)).new(all_errors)
+    else
+      Result::Success(Array(T)).new(values)
+    end
   end
 end
