@@ -48,6 +48,10 @@ module Therapy
     ArrayType(T).new(validator)
   end
 
+  def self.hash(key_validator : BaseType(K), value_validator : BaseType(V)) : HashType(K, V) forall K, V
+    HashType(K, V).new(key_validator, value_validator)
+  end
+
   def self.tuple(*options : *T) forall T
     {% begin %}
     TupleType(T, {
