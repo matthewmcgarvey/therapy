@@ -12,25 +12,48 @@ class Therapy::OptionalType(T) < Therapy::BaseType(T?)
     Result::Success(T?).new(nil)
   end
 
-  def coerce(value : V, path : Array(String | Int32) = [] of String | Int32) : Result(T?) forall V
-    coerce_value(value, path)
+  def create_context(value : V, path : Array(String | Int32)) : ParseContext(T?, V) forall V
+    context = ParseContext(T?, V).new(value, self, path)
+    setup_subcontext(value, path, context)
+    context
   end
 
-  private def coerce_value(value : JSON::Any, path) : Result(T?)
+  private def setup_subcontext(value : V, path, context : ParseContext(T?, V)) forall V
+    setup_subcontext_for(value, path, context)
+  end
+
+  private def setup_subcontext_for(value : JSON::Any, path, context)
     raw_val = value.raw
-    if raw_val.nil?
-      Result::Success(T?).new(nil)
+    return if raw_val.nil?
+    inner_ctx = inner.create_context(raw_val, path)
+    context.with_subcontexts(
+      parse: -> { inner_ctx.do_parse },
+      collect_errors: -> { inner_ctx.errors },
+      assemble: -> { inner_ctx.result_value.as(T??) }
+    )
+  end
+
+  private def setup_subcontext_for(value : Nil, path, context)
+    # nil value - no subcontext needed
+  end
+
+  private def setup_subcontext_for(value, path, context)
+    inner_ctx = inner.create_context(value, path)
+    context.with_subcontexts(
+      parse: -> { inner_ctx.do_parse },
+      collect_errors: -> { inner_ctx.errors },
+      assemble: -> { inner_ctx.result_value.as(T??) }
+    )
+  end
+
+  def coerce(context : ParseContext(T?, V)) : Result(T?) forall V
+    if context.has_subcontexts?
+      assembled = context.assemble_from_subcontexts
+      Result::Success(T?).new(assembled)
     else
-      inner.coerce(raw_val, path).map(&.as(T?))
+      # No subcontext means value was nil
+      Result::Success(T?).new(nil)
     end
-  end
-
-  private def coerce_value(value : Nil, path) : Result(T?)
-    Result::Success(T?).new(nil)
-  end
-
-  private def coerce_value(value, path) : Result(T?)
-    inner.coerce(value, path).map(&.as(T?))
   end
 
   protected def apply_checks(context : ParseContext(T?, T?)) : Nil

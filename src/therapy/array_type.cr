@@ -15,42 +15,63 @@ class Therapy::ArrayType(T) < Therapy::BaseType(Array(T))
     end
   end
 
-  def coerce(value : V, path : Array(String | Int32) = [] of String | Int32) : Result(Array(T)) forall V
-    coerce_value(value, path)
+  def create_context(value : V, path : Array(String | Int32)) : ParseContext(Array(T), V) forall V
+    context = ParseContext(Array(T), V).new(value, self, path)
+    setup_subcontexts(value, path, context)
+    context
+  end
+
+  private def setup_subcontexts(value : V, path, context : ParseContext(Array(T), V)) forall V
+    setup_subcontexts_for(value, path, context)
+  end
+
+  private def setup_subcontexts_for(value : JSON::Any, path, context)
+    arr = value.as_a?
+    return if arr.nil?
+    elem_contexts = arr.map_with_index do |val, idx|
+      validator.create_context(val, path + [idx.as(String | Int32)])
+    end
+    setup_context_handlers(elem_contexts, context)
+  end
+
+  private def setup_subcontexts_for(value : Array, path, context)
+    elem_contexts = value.map_with_index do |val, idx|
+      validator.create_context(val, path + [idx.as(String | Int32)])
+    end
+    setup_context_handlers(elem_contexts, context)
+  end
+
+  private def setup_subcontexts_for(value, path, context)
+    # Unknown type - no subcontexts, coerce will fail
+  end
+
+  private def setup_context_handlers(elem_contexts, context)
+    context.with_subcontexts(
+      parse: -> { elem_contexts.each(&.do_parse) },
+      collect_errors: -> { elem_contexts.flat_map(&.errors) },
+      assemble: -> { elem_contexts.map(&.result_value).as(Array(T)?) }
+    )
+  end
+
+  def coerce(context : ParseContext(Array(T), V)) : Result(Array(T)) forall V
+    if context.has_subcontexts?
+      assembled = context.assemble_from_subcontexts
+      if assembled
+        Result::Success(Array(T)).new(assembled)
+      else
+        Result::Failure(Array(T)).with_msg("Failed to assemble array", context.full_path)
+      end
+    else
+      # No subcontexts means input wasn't a valid array type
+      coerce_value(context.value, context.full_path)
+    end
   end
 
   private def coerce_value(value : JSON::Any, path) : Result(Array(T))
-    arr = value.as_a?
-    return Result::Failure(Array(T)).with_msg("Expected JSON to be an Array but it was a #{value.raw.class}", path) if arr.nil?
-    coerce_elements(arr, path)
-  end
-
-  private def coerce_value(value : Array, path) : Result(Array(T))
-    coerce_elements(value, path)
+    Result::Failure(Array(T)).with_msg("Expected JSON to be an Array but it was a #{value.raw.class}", path)
   end
 
   private def coerce_value(value, path) : Result(Array(T))
     Result::Failure(Array(T)).with_msg("Expected Array but got #{value.class}", path)
-  end
-
-  private def coerce_elements(arr, path) : Result(Array(T))
-    all_errors = [] of Error
-    values = [] of T
-
-    arr.each_with_index do |val, idx|
-      elem_path = path + [idx.as(String | Int32)]
-      result = validator.coerce(val, elem_path)
-      if result.failure?
-        all_errors.concat(result.errors)
-      else
-        values << result.value
-      end
-    end
-
-    if all_errors.any?
-      Result::Failure(Array(T)).new(all_errors)
-    else
-      Result::Success(Array(T)).new(values)
-    end
   end
 end

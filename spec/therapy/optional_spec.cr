@@ -1,15 +1,10 @@
 require "../spec_helper"
 
 describe Therapy::OptionalType do
-  it "handles present string" do
+  it "handles string" do
     validation = Therapy.string.optional
 
     validation.parse!("abc").should eq("abc")
-  end
-
-  it "handles missing string" do
-    validation = Therapy.string.optional
-
     validation.parse!(nil).should eq(nil)
   end
 
@@ -18,11 +13,14 @@ describe Therapy::OptionalType do
 
     validation.parse!("abcdef").should eq("abcdef")
     validation.parse("abc").should be_error("Must have minimum size of 5")
+    validation.parse!(nil).should eq(nil)
   end
 
-  it "handles bool coerced from string" do
+  it "handles bool" do
     validation = Therapy.bool.optional
 
     validation.parse!("true").should eq(true)
+    validation.parse!(false).should eq(false)
+    validation.parse!(nil).should eq(nil)
   end
 end
