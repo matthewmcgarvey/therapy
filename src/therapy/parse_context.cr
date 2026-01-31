@@ -29,18 +29,3 @@ class Therapy::ParseContext(T, V)
     end
   end
 end
-
-class Therapy::SubContext(T, V, PARENT) < Therapy::ParseContext(T, V)
-  private getter parent : PARENT
-  property value : V
-  getter path : PathType
-
-  def initialize(@parent, @value, @path)
-    @full_path = @parent.full_path.clone
-    temp = path
-    temp = temp.to_s if temp.is_a?(Symbol)
-    if temp.is_a?(String | Int32)
-      @full_path << temp
-    end
-  end
-end

@@ -8,7 +8,7 @@ class Therapy::ArrayType(T) < Therapy::BaseType(Array(T))
     checks.each(&.check(context))
     value = context.value
     value.each_with_index do |val, idx|
-      subcontext = validator.create_subcontext(context, val, path: idx)
+      subcontext = validator.new_context(val, path: idx)
       validator.apply_checks(subcontext)
       context.errors.concat(subcontext.errors)
     end

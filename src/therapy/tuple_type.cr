@@ -9,7 +9,7 @@ class Therapy::TupleType(VALIDATORS, OUT) < Therapy::BaseType(OUT)
     value = context.value
     validators.map_with_index do |validator, idx|
       val = value[idx]
-      subcontext = validator.create_subcontext(context, val, path: idx)
+      subcontext = validator.new_context(val, path: idx)
       validator.apply_checks(subcontext)
       context.errors.concat(subcontext.errors)
     end

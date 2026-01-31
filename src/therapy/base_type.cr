@@ -13,8 +13,10 @@ abstract class Therapy::BaseType(T)
     _parse(ParseContext(T, V).new(input))
   end
 
-  def create_subcontext(parent : ParseContext, input : V, path : PathType) : ParseContext(T, V) forall V
-    SubContext(T, V, typeof(parent)).new(parent, input, path).as(ParseContext(T, V))
+  protected def new_context(input : V, path : PathType?) : ParseContext(T, T) forall V
+    context = ParseContext(T, T).new(input.as(T))
+    context.full_path << path if path
+    context
   end
 
   protected def _parse(context : ParseContext(T, V)) : Result(T) forall V

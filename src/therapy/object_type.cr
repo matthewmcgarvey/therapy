@@ -13,7 +13,7 @@ class Therapy::ObjectType(VALIDATORS, OUT) < Therapy::BaseType(OUT)
     value = context.value
     validators.each do |key, validator|
       val = value[key]
-      subcontext = validator.create_subcontext(context, val, path: key)
+      subcontext = validator.new_context(val, path: key.to_s)
       validator.apply_checks(subcontext)
       context.errors.concat(subcontext.errors)
     end
