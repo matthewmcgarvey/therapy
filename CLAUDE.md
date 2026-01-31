@@ -30,13 +30,14 @@ Input → BaseType.parse() → ParseContext → coerce() → apply_checks() → 
 **Type Hierarchy:**
 All validators inherit from `BaseType<T>`:
 - `StringType`, `IntType<INT>`, `FloatType<FLOAT>`, `BoolType`, `EnumType<E>` - primitives
-- `ArrayType<T>`, `ObjectType<VALIDATORS, OUT>`, `TupleType<VALIDATORS, OUT>` - collections
+- `ArrayType<T>`, `ObjectType<VALIDATORS, OUT>`, `TupleType<VALIDATORS, OUT>`, `HashType<K, V>` - collections
 - `OptionalType<T>`, `UnionType<L, R>` - composition
 
 **DSL Entry Points** (in `src/therapy.cr`):
 ```crystal
 Therapy.string, Therapy.int, Therapy.float, Therapy.bool
 Therapy.array(element_type), Therapy.object(**fields), Therapy.tuple(*types)
+Therapy.hash(key_type, value_type)
 Therapy.enum(MyEnum)
 ```
 
@@ -47,7 +48,12 @@ Therapy.enum(MyEnum)
 - `_coerce(value)` - protected, type conversion (overloaded per input type)
 
 **Coercion Pattern:**
-Each type implements `_coerce` overloads for: `JSON::Any`, `Hash`, `NamedTuple`, `URI::Params`, and primitives.
+- Types implement `_coerce` overloads for relevant inputs (e.g. `JSON::Any`, primitives).
+- Container types use `ParseContext` subcontexts to assemble results from `Hash`, `NamedTuple`, `Array`, `JSON::Any`, and `URI::Params` where supported.
+
+**Notes:**
+- `UnionType` tries left then right; current failure message is a fixed string per spec.
+- `IntType` does not coerce from `String` outside of `JSON::Any` parsing.
 
 **Error Paths:**
 Errors include path to failing field as `Array(String | Int32)` (e.g., `["users", 0, "email"]`).
