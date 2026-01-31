@@ -15,7 +15,7 @@ class Therapy::ArrayType(T) < Therapy::BaseType(Array(T))
     end
   end
 
-  def create_context(value : V, path : Array(String | Int32)) : ParseContext(Array(T), V) forall V
+  protected def create_context(value : V, path : Array(String | Int32)) : ParseContext(Array(T), V) forall V
     context = ParseContext(Array(T), V).new(value, self, path)
     setup_subcontexts(value, path, context)
     context
@@ -53,7 +53,7 @@ class Therapy::ArrayType(T) < Therapy::BaseType(Array(T))
     )
   end
 
-  def coerce(context : ParseContext(Array(T), V)) : Result(Array(T)) forall V
+  protected def coerce(context : ParseContext(Array(T), V)) : Result(Array(T)) forall V
     if context.has_subcontexts?
       assembled = context.assemble_from_subcontexts
       if assembled

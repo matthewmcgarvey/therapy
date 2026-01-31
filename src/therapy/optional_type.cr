@@ -12,7 +12,7 @@ class Therapy::OptionalType(T) < Therapy::BaseType(T?)
     Result::Success(T?).new(nil)
   end
 
-  def create_context(value : V, path : Array(String | Int32)) : ParseContext(T?, V) forall V
+  protected def create_context(value : V, path : Array(String | Int32)) : ParseContext(T?, V) forall V
     context = ParseContext(T?, V).new(value, self, path)
     setup_subcontext(value, path, context)
     context
@@ -46,7 +46,7 @@ class Therapy::OptionalType(T) < Therapy::BaseType(T?)
     )
   end
 
-  def coerce(context : ParseContext(T?, V)) : Result(T?) forall V
+  protected def coerce(context : ParseContext(T?, V)) : Result(T?) forall V
     if context.has_subcontexts?
       assembled = context.assemble_from_subcontexts
       Result::Success(T?).new(assembled)

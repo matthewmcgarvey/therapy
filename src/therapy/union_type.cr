@@ -5,7 +5,7 @@ class Therapy::UnionType(L, R) < Therapy::BaseType(L | R)
   def initialize(@left : BaseType(L), @right : BaseType(R))
   end
 
-  def coerce(context : ParseContext(L | R, V)) : Result(L | R) forall V
+  protected def coerce(context : ParseContext(L | R, V)) : Result(L | R) forall V
     left_result = left.create_context(context.value, context.full_path).parse
     if left_result.success?
       return Result::Success(L | R).new(left_result.value.as(L | R))

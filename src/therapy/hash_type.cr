@@ -16,7 +16,7 @@ class Therapy::HashType(K, V) < Therapy::BaseType(Hash(K, V))
     end
   end
 
-  def create_context(value : W, path : Array(String | Int32)) : ParseContext(Hash(K, V), W) forall W
+  protected def create_context(value : W, path : Array(String | Int32)) : ParseContext(Hash(K, V), W) forall W
     context = ParseContext(Hash(K, V), W).new(value, self, path)
     setup_subcontexts(value, path, context)
     context
@@ -90,7 +90,7 @@ class Therapy::HashType(K, V) < Therapy::BaseType(Hash(K, V))
     )
   end
 
-  def coerce(context : ParseContext(Hash(K, V), W)) : Result(Hash(K, V)) forall W
+  protected def coerce(context : ParseContext(Hash(K, V), W)) : Result(Hash(K, V)) forall W
     if context.has_subcontexts?
       assembled = context.assemble_from_subcontexts
       if assembled

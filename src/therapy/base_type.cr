@@ -18,7 +18,7 @@ abstract class Therapy::BaseType(T)
   end
 
   # Creates a parse context - override in container types to include subcontexts
-  def create_context(value : V, path : Array(String | Int32)) : ParseContext(T, V) forall V
+  protected def create_context(value : V, path : Array(String | Int32)) : ParseContext(T, V) forall V
     ParseContext(T, V).new(value, self, path)
   end
 
@@ -31,14 +31,14 @@ abstract class Therapy::BaseType(T)
   end
 
   # Runs apply_checks on an already-coerced value, returning any errors
-  def apply_checks_on_coerced(value, path : Array(String | Int32) = [] of String | Int32) : Array(Error)
+  protected def apply_checks_on_coerced(value, path : Array(String | Int32) = [] of String | Int32) : Array(Error)
     context = ParseContext(T, T).new(value.as(T), self, path)
     apply_checks(context)
     context.errors
   end
 
   # Coerce the value, using subcontext results for container types
-  def coerce(context : ParseContext(T, V)) : Result(T) forall V
+  protected def coerce(context : ParseContext(T, V)) : Result(T) forall V
     result = _coerce(context.value)
     if result.failure? && result.errors.any?(&.path.empty?)
       # Add path to errors that don't have one

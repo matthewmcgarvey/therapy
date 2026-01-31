@@ -20,7 +20,7 @@ class Therapy::ObjectType(VALIDATORS, OUT) < Therapy::BaseType(OUT)
     end
   end
 
-  def create_context(value : V, path : Array(String | Int32)) : ParseContext(OUT, V) forall V
+  protected def create_context(value : V, path : Array(String | Int32)) : ParseContext(OUT, V) forall V
     context = ParseContext(OUT, V).new(value, self, path)
     setup_subcontexts(value, path, context)
     context
@@ -84,7 +84,7 @@ class Therapy::ObjectType(VALIDATORS, OUT) < Therapy::BaseType(OUT)
     )
   end
 
-  def coerce(context : ParseContext(OUT, V)) : Result(OUT) forall V
+  protected def coerce(context : ParseContext(OUT, V)) : Result(OUT) forall V
     if context.has_subcontexts?
       # Assemble result from parsed subcontexts
       assembled = context.assemble_from_subcontexts
